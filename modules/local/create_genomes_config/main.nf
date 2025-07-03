@@ -4,8 +4,9 @@ process CREATE_GENOMES_CONFIG {
 
     tag "$genome_version_name"
 
-    conda "${moduleDir}/environment.yml"
-    // create containers
+    conda "${moduleDir}/environment.yml" 
+    container 'gitlab.fht.org:5050/nfdata-omics/genome-config:test'
+    containerOptions = '--platform=linux/amd64 --entrypoint=""'
 
     input:
     val genome_version_name
@@ -27,6 +28,8 @@ process CREATE_GENOMES_CONFIG {
     script:
     def args = task.ext.args ?: ''
 
+    def script_path = workflow.containerEngine ? "/opt/app/build_config.py" : "${moduleDir}/scripts/build_config.py"
+
     def outdir_abs = java.nio.file.Paths.get(params.outdir.toString()).toAbsolutePath().toString()
 
     def fasta_abs = "$outdir_abs/fasta/$fasta"
@@ -39,15 +42,18 @@ process CREATE_GENOMES_CONFIG {
 
     def config_file = "${outdir_abs}/genomes.config"
     """
+    #!/bin/bash
+    set -euo pipefail
+
     mkdir -p $outdir_abs/fasta
     cp $fasta $outdir_abs/fasta/
 
     mkdir -p $outdir_abs/genes
     cp $gtf $outdir_abs/genes/
 
-    python3.11 ${moduleDir}/scripts/build_config.py \
-        --genomeVersionName $genome_version_name \
-        --currentConfigFile $current_config_file \
+    python3.11 $script_path \
+        --genome_version_name $genome_version_name \
+        --current_config_file $current_config_file \
         --fasta $fasta_abs \
         --bwa $bwa_abs \
         --bowtie2 $bowtie2_abs \
@@ -55,7 +61,7 @@ process CREATE_GENOMES_CONFIG {
         --samtools $samtools_abs \
         --star $star_abs \
         --gtf $gtf_abs \
-        --outputFile $config_file \
+        --output_file $config_file \
         $args
     """
 }
