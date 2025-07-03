@@ -9,6 +9,8 @@ include { SAMTOOLS_FAIDX } from '../modules/nf-core/samtools/faidx/main.nf'
 include { STAR_GENOMEGENERATE } from '../modules/nf-core/star/genomegenerate/main'
 include { GATK4_CREATESEQUENCEDICTIONARY } from '../modules/nf-core/gatk4/createsequencedictionary/main.nf'
 include { BISMARK_GENOMEPREPARATION } from '../modules/nf-core/bismark/genomepreparation/main'
+include { RSEM_PREPAREREFERENCE } from '../modules/nf-core/rsem/preparereference/main' 
+
 include { CREATE_GENOMES_CONFIG } from '../modules/local/create_genomes_config/main.nf'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -60,6 +62,17 @@ workflow GENOMEPREP {
         // Run Bismark indexing
         //
         BISMARK_GENOMEPREPARATION(fasta)
+
+        //
+        // Run RSEM indexing
+        //
+        ch_gtf_valid = gtf.filter { meta, file -> file.name != "no_gtf" }
+
+        RSEM_PREPAREREFERENCE(
+            fasta.map { it[1] },
+            ch_gtf_valid.map { it[1] }
+        )
+
 
         // Create genomes.config file
         CREATE_GENOMES_CONFIG(
