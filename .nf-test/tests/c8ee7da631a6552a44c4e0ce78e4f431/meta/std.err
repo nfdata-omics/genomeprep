@@ -1,5 +1,0 @@
-[0;31mThe following invalid input values have been detected:
-
-* --fasta (https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv): "https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv" does not match regular expression [^\S+\.fn?a(sta)?(\.gz)?$]
-[0m
- -- Check script '/Users/leandro.tiburske/Documents/pipelines/nf-core-genomeprep/subworkflows/nf-core/utils_nfschema_plugin/main.nf' at line: 39 or see '/Users/leandro.tiburske/Documents/pipelines/nf-core-genomeprep/.nf-test/tests/c8ee7da631a6552a44c4e0ce78e4f431/meta/nextflow.log' file for more details

@@ -71,16 +71,20 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from fasta file provided through params.fasta
     //
-
     ch_fasta = Channel.fromPath(fasta).map { file ->
             def meta = file.baseName
             tuple(meta, file)
     }
 
-    ch_gtf = Channel.fromPath(gtf).map { file ->
+    //
+    // Create channel from gtf file provided through params.gtf
+    //
+    ch_gtf = gtf ? 
+        Channel.fromPath(gtf).map { file ->
             def meta = file.baseName
             tuple(meta, file)
-    }
+        } : 
+        Channel.value(tuple("no_gtf", file('no_gtf')))  
 
     emit:
     fasta = ch_fasta

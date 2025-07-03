@@ -17,6 +17,7 @@ process CREATE_GENOMES_CONFIG {
     path gatk4_dict
     path samtools_index
     path star_index
+    path bismark_index
     path gtf
 
     output:
@@ -38,18 +39,23 @@ process CREATE_GENOMES_CONFIG {
     def gatk_abs = "$outdir_abs/$gatk4_dict"
     def samtools_abs = "$outdir_abs/$samtools_index/"
     def star_abs = "$outdir_abs/$star_index/"
-    def gtf_abs = "$outdir_abs/genes/$gtf"
+    def bismark_abs = "$outdir_abs/$bismark_index/"
+    def gtf_abs = (gtf.name != "no_gtf") ? "$outdir_abs/genes/$gtf" : ""
 
     def config_file = "${outdir_abs}/genomes.config"
+
+    def gtf_args = (gtf.name != 'no_gtf') ? "--gtf $gtf_abs" : ""
     """
     #!/bin/bash
     set -euo pipefail
 
+    if [ "$gtf" != "no_gtf" ]; then
+        mkdir -p $outdir_abs/genes
+        cp $gtf $outdir_abs/genes/
+    fi
+
     mkdir -p $outdir_abs/fasta
     cp $fasta $outdir_abs/fasta/
-
-    mkdir -p $outdir_abs/genes
-    cp $gtf $outdir_abs/genes/
 
     python3.11 $script_path \
         --genome_version_name $genome_version_name \
@@ -60,7 +66,8 @@ process CREATE_GENOMES_CONFIG {
         --gatk $gatk_abs \
         --samtools $samtools_abs \
         --star $star_abs \
-        --gtf $gtf_abs \
+        --bismark $bismark_abs \
+        $gtf_args \
         --output_file $config_file \
         $args
     """

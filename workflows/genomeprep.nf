@@ -8,6 +8,7 @@ include { BWA_INDEX } from '../modules/nf-core/bwa/index/main.nf'
 include { SAMTOOLS_FAIDX } from '../modules/nf-core/samtools/faidx/main.nf'
 include { STAR_GENOMEGENERATE } from '../modules/nf-core/star/genomegenerate/main'
 include { GATK4_CREATESEQUENCEDICTIONARY } from '../modules/nf-core/gatk4/createsequencedictionary/main.nf'
+include { BISMARK_GENOMEPREPARATION } from '../modules/nf-core/bismark/genomepreparation/main'
 include { CREATE_GENOMES_CONFIG } from '../modules/local/create_genomes_config/main.nf'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -47,12 +48,18 @@ workflow GENOMEPREP {
         //
         // Run STAR indexing
         //
-        STAR_GENOMEGENERATE(fasta, gtf)
+        STAR_GENOMEGENERATE(fasta, 
+                            gtf)
 
         //
         // Create sequence dictionary with GATK4
         //
         GATK4_CREATESEQUENCEDICTIONARY(fasta)
+
+        //
+        // Run Bismark indexing
+        //
+        BISMARK_GENOMEPREPARATION(fasta)
 
         // Create genomes.config file
         CREATE_GENOMES_CONFIG(
@@ -64,6 +71,7 @@ workflow GENOMEPREP {
             GATK4_CREATESEQUENCEDICTIONARY.out.dict.collect { it[1] },
             SAMTOOLS_FAIDX.out.fai.collect { it[1] },
             STAR_GENOMEGENERATE.out.index.collect { it[1] },
+            BISMARK_GENOMEPREPARATION.out.index.collect { it[1] },
             gtf.collect { it[1] }
         )
 
