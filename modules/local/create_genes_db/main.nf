@@ -2,7 +2,9 @@ process CREATE_GENES_DB {
 
     publishDir "${params.outdir}/genes_db", mode: 'copy'
 
-    container 'quay.io/biocontainers/python:3.11'
+    container 'gitlab.fht.org:5050/nfdata-omics/genes-db:test'
+    containerOptions = '--platform=linux/amd64 --entrypoint=""'
+
 
     tag "$gtf"
 
@@ -18,7 +20,10 @@ process CREATE_GENES_DB {
 
     script:
     """
-    python3.11 ${moduleDir}/scripts/create_genes_db.py \
+    #!/bin/bash
+    set -euo pipefail
+
+    python3.11 /app/create_genes_db.py \
         makedb \
         -db $gtf \
         genes.db
