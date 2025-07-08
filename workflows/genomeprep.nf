@@ -11,10 +11,12 @@ include { STAR_GENOMEGENERATE } from '../modules/nf-core/star/genomegenerate/mai
 include { GATK4_CREATESEQUENCEDICTIONARY } from '../modules/nf-core/gatk4/createsequencedictionary/main.nf'
 include { BISMARK_GENOMEPREPARATION } from '../modules/nf-core/bismark/genomepreparation/main'
 include { RSEM_PREPAREREFERENCE } from '../modules/nf-core/rsem/preparereference/main' 
+include { MD5SUM } from '../modules/nf-core/md5sum/main'   
+
 include { CREATE_GENES_DB} from '../modules/local/create_genes_db/main.nf'
 include { CREATE_BED_FILES } from '../modules/local/create_bed_files/main.nf'
-
 include { CREATE_GENOMES_CONFIG } from '../modules/local/create_genomes_config/main.nf'
+
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_genomeprep_pipeline'
@@ -126,6 +128,42 @@ workflow GENOMEPREP {
             ch_bed,
             gtf.collect { it[1] }
         )
+
+        // Mapear cada output individualmente para garantir formato correto
+        Channel.empty()
+            .mix(
+                COUNT_CHROMOSOMES_SIZES.out.chromosomes_sizes
+                    .map { file -> tuple([id: file.baseName], file) },
+                BOWTIE2_BUILD.out.index
+                    .map { meta, file -> tuple([id: file.baseName], file) },
+                BWA_INDEX.out.index
+                    .map { meta, file -> tuple([id: file.baseName], file) },
+                SAMTOOLS_FAIDX.out.fai
+                    .map { meta, file -> tuple([id: file.baseName], file) },
+                STAR_GENOMEGENERATE.out.index
+                    .map { meta, file -> tuple([id: file.baseName], file) },
+                GATK4_CREATESEQUENCEDICTIONARY.out.dict
+                    .map { meta, file -> tuple([id: file.baseName], file) },
+                BISMARK_GENOMEPREPARATION.out.index
+                    .map { meta, file -> tuple([id: file.baseName], file) },
+                CREATE_GENOMES_CONFIG.out.config
+                    .map { file -> tuple([id: file.baseName], file) },
+                RSEM_PREPAREREFERENCE.out.index
+                    .ifEmpty([])
+                    .filter { it != [] } 
+                    .map { file -> tuple([id: file.baseName], file) }, 
+                CREATE_BED_FILES.out.bed
+                    .ifEmpty([])
+                    .filter { it != [] }
+                    .map { file -> tuple([id: file.baseName], file) },
+                CREATE_GENES_DB.out.db
+                    .ifEmpty([])
+                    .filter { it != [] }
+                    .map { file -> tuple([id: file.baseName], file) }
+            )
+            .set { ch_for_md5 }
+
+        MD5SUM(ch_for_md5, false)
 
         //
         // Retrieve versions.yml output of each process 
