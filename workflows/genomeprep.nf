@@ -3,6 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+include { HANDLE_README} from '../modules/local/handle_readme/main.nf'
 include { COUNT_CHROMOSOMES_SIZES } from '../modules/local/count_chromosomes_sizes/main.nf'
 include { BOWTIE2_BUILD } from '../modules/nf-core/bowtie2/build/main'
 include { BWA_INDEX } from '../modules/nf-core/bwa/index/main.nf'
@@ -35,6 +36,19 @@ workflow GENOMEPREP {
 
     main:
         ch_versions = Channel.empty()
+
+        //
+        // Handle README files and create a summary of run
+        //
+        ch_gtf_readme = params.gtf_readme ?
+            Channel.from(params.gtf_readme) :
+            Channel.from(file("no_gtf_readme", checkIfExists: false))
+
+        HANDLE_README(params.fasta_readme,
+                      ch_gtf_readme,
+                      params.genome_version_name,
+                      params.current_config_file)
+
 
         //
         // Count chromosomes sizes
@@ -179,6 +193,7 @@ workflow GENOMEPREP {
         ch_bed_versions = CREATE_BED_FILES.out.versions
         ch_db_versions = CREATE_GENES_DB.out.versions
         ch_config_versions = CREATE_GENOMES_CONFIG.out.versions
+        ch_md5sum_versions = MD5SUM.out.versions
 
         //
         // Add software versions to `ch_versions`
@@ -195,7 +210,8 @@ workflow GENOMEPREP {
                 ch_rsem_versions,
                 ch_bed_versions,
                 ch_db_versions,
-                ch_config_versions
+                ch_config_versions,
+                ch_md5sum_versions
             ).flatten()
 
         //

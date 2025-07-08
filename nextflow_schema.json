@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["genome_version_name", "outdir"],
+            "required": ["genome_version_name", "fasta_readme", "outdir"],
             "properties": {
                 "genome_version_name": {
                     "type": "string"
@@ -26,6 +26,17 @@
                     "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
                     "description": "Path to FASTA genome file.",
                     "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "fasta_readme": {
+                    "type": "string",
+                    "description": "README containing details about the FASTA file.",
+                    "format": "file-path",
+                    "fa_icon": "far fa-file-code"
+                },
+                "gtf_readme": {
+                    "type": "string",
+                    "description": "README file containing details about the GTF file.",
                     "fa_icon": "far fa-file-code"
                 },
                 "gtf": {
