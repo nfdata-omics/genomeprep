@@ -30,18 +30,6 @@ process HANDLE_README {
         echo "- GTF file: \n \t Not provided" >> README.md
     fi
     echo "- Genome version name: \n \t $genome_version_name" >> README.md
-    echo "- Previous configuration file: \n \t $current_config_file" >> README.md
-    echo "" >> README.md
-
-    echo "## Previous Configuration" >> README.md
-    if [ -f "$current_config_file" ]; then
-        echo "" >> README.md
-        echo "Previous configurations:" >> README.md
-        echo ""
-        cat "$current_config_file" >> README.md
-    else
-        echo "No previous configuration file provided." >> README.md
-    fi
     """
 
 }

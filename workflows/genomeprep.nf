@@ -5,6 +5,10 @@
 */
 include { HANDLE_README} from '../modules/local/handle_readme/main.nf'
 include { COUNT_CHROMOSOMES_SIZES } from '../modules/local/count_chromosomes_sizes/main.nf'
+include { CELLRANGER_MKREF } from '../modules/nf-core/cellranger/mkref/main'
+include { CELLRANGERATAC_MKREF } from '../modules/nf-core/cellrangeratac/mkref/main'
+include { CELLRANGER_MKVDJREF } from '../modules/nf-core/cellranger/mkvdjref/main'
+include { SPACERANGER_MKREF } from '../modules/nf-core/spaceranger/mkref/main'
 include { BOWTIE2_BUILD } from '../modules/nf-core/bowtie2/build/main'
 include { BWA_INDEX } from '../modules/nf-core/bwa/index/main.nf'
 include { SAMTOOLS_FAIDX } from '../modules/nf-core/samtools/faidx/main.nf'
@@ -33,22 +37,23 @@ workflow GENOMEPREP {
     take:
         fasta // channel: fasta read in from --fasta
         gtf   // channel: gtf read in from --gtf
+        genome_version_name // string: genome version name read in from --genome_version_name
+        organism // string: organism name read in from --organism
+        current_config_file // string: path to the current config file
+        fasta_readme // channel: fasta readme read in from --fasta_readme
+        gtf_readme // channel: gtf readme read in from --gtf_readme
+        vdj_fasta // channel: vdj_fasta read in from --vdj_fasta
+        non_nuclear_contigs // channel: non-nuclear contigs to be excluded from ATAC reference generation (e.g.: --non_nuclear_contigs "chrM,chrY")
+        transcription_factors // channel: transcription factors read in from --transcription_factors (e.g.: --transcription_factors "motifs.pfm")
 
     main:
-        ch_versions = Channel.empty()
 
         //
-        // Handle README files and create a summary of run
-        //
-        ch_gtf_readme = params.gtf_readme ?
-            Channel.from(params.gtf_readme) :
-            Channel.from(file("no_gtf_readme", checkIfExists: false))
-
-        HANDLE_README(params.fasta_readme,
-                      ch_gtf_readme,
-                      params.genome_version_name,
-                      params.current_config_file)
-
+        // Create README for the Genome Version based on FASTA and GTF READMEs
+        HANDLE_README(fasta_readme,
+                      gtf_readme,
+                      genome_version_name,
+                      current_config_file)
 
         //
         // Count chromosomes sizes
@@ -88,18 +93,19 @@ workflow GENOMEPREP {
         BISMARK_GENOMEPREPARATION(fasta)
 
         //
-        // Run RSEM indexing
+        // Create a GTF channel to handle missing files
         //
         ch_gtf_valid = gtf.filter { meta, file -> file.name != "no_gtf" }
 
+        //
+        // Run RSEM indexing
+        //
         RSEM_PREPAREREFERENCE(
             fasta.map { it[1] },
             ch_gtf_valid.map { it[1] }
         )
 
-        //
-        // Create channel to handle RSEM output
-        //
+        // Channel to handle RSEM output
         ch_rsem = RSEM_PREPAREREFERENCE.out.index.ifEmpty {
             file("no_rsem", checkIfExists: false)
         }
@@ -111,6 +117,7 @@ workflow GENOMEPREP {
             ch_gtf_valid.map { it[1] }
         )
 
+        // Channel to handle CREATE_GENES_DB output
         ch_db = CREATE_GENES_DB.out.db.ifEmpty {
             file("no_genes_db", checkIfExists: false)
         }
@@ -122,14 +129,100 @@ workflow GENOMEPREP {
             CREATE_GENES_DB.out.db
         )
 
+        // Channel to handle CREATE_BED_FILES output
         ch_bed = CREATE_BED_FILES.out.bed.ifEmpty {
             file("no_bed", checkIfExists: false)
         }
 
+        //
+        // Create Cell Ranger reference
+        //
+        CELLRANGER_MKREF(
+            fasta.map { it[1] },
+            ch_gtf_valid.map { it[1] },
+            genome_version_name        
+        )
+
+        // Channel to handle CELLRANGER_MKREF output
+        ch_cellranger = CELLRANGER_MKREF.out.reference.ifEmpty {
+            file("no_cellranger", checkIfExists: false)
+        }
+
+        //
+        // Create Cell Ranger VDJ reference
+        //
+        CELLRANGER_MKVDJREF(
+            fasta.map { it[1] },
+            ch_gtf_valid.map { it[1] },
+            vdj_fasta,
+            genome_version_name
+        )
+
+        // Channel to handle CELLRANGER_MKVDJREF output
+        ch_vdj = CELLRANGER_MKVDJREF.out.reference.ifEmpty {
+            file("no_cellranger_vdj", checkIfExists: false)
+        }
+
+        //
+        // Create Spacer Ranger reference
+        //
+        SPACERANGER_MKREF(
+            fasta.map { it[1] },
+            ch_gtf_valid.map { it[1] },
+            genome_version_name
+        )
+
+        // Channel to handle SPACERANGER_MKREF output
+        ch_spaceranger = SPACERANGER_MKREF.out.reference.ifEmpty {
+            file("no_spaceranger", checkIfExists: false)
+        }
+
+        //
+        // Create Cell Ranger ATAC reference
+        //
+        fasta.map { it[1] }
+            .combine(ch_gtf_valid.map { it[1] })
+            .combine(non_nuclear_contigs)
+            .map { files ->
+
+                def fasta_file = files[0]
+                def gtf_file = files[1]
+                def contigs = files[2]
+
+                def config = [
+                    organism: organism.val,
+                    genome: [genome_version_name.val],  
+                    input_fasta: [fasta_file.toString()],
+                    input_gtf: [gtf_file.toString()],
+                ]
+
+                if (transcription_factors && transcription_factors.isEmpty() == false) {
+                    config.input_motifs = transcription_factors
+                }
+
+                if (contigs && contigs.size() > 0) {
+                    config.non_nuclear_contigs = contigs
+                }
+
+                return config
+            }
+            .set { ch_reference_config }
+
+        CELLRANGERATAC_MKREF(
+            fasta.map { it[1] },
+            ch_reference_config,
+            genome_version_name
+        )
+
+        // Channel to handle CELLRANGERATAC_MKREF output
+        ch_atac = CELLRANGERATAC_MKREF.out.reference.ifEmpty {
+            file("no_atac", checkIfExists: false)
+        }
+
         // Create genomes.config file
         CREATE_GENOMES_CONFIG(
-            params.genome_version_name,
-            params.current_config_file,
+            genome_version_name,
+            current_config_file,
             fasta.collect { it[1] },
             BOWTIE2_BUILD.out.index.collect { it[1] },
             BWA_INDEX.out.index.collect { it[1] },
@@ -137,15 +230,25 @@ workflow GENOMEPREP {
             SAMTOOLS_FAIDX.out.fai.collect { it[1] },
             STAR_GENOMEGENERATE.out.index.collect { it[1] },
             BISMARK_GENOMEPREPARATION.out.index.collect { it[1] },
+            COUNT_CHROMOSOMES_SIZES.out.chromosomes_sizes,
+            HANDLE_README.out.readme,
             ch_rsem,
             ch_db,
             ch_bed,
-            gtf.collect { it[1] }
+            gtf.collect { it[1] },
+            ch_cellranger,
+            ch_atac,
+            ch_vdj,
+            ch_spaceranger
         )
 
-        // Mapear cada output individualmente para garantir formato correto
+        //
+        // Mix output files for MD5SUM
+        //
         Channel.empty()
             .mix(
+                HANDLE_README.out.readme
+                    .map { file -> tuple([id: file.baseName], file) },
                 COUNT_CHROMOSOMES_SIZES.out.chromosomes_sizes
                     .map { file -> tuple([id: file.baseName], file) },
                 BOWTIE2_BUILD.out.index
@@ -173,7 +276,23 @@ workflow GENOMEPREP {
                 CREATE_GENES_DB.out.db
                     .ifEmpty([])
                     .filter { it != [] }
-                    .map { file -> tuple([id: file.baseName], file) }
+                    .map { file -> tuple([id: file.baseName], file) },
+                CELLRANGER_MKREF.out.reference
+                    .ifEmpty([])
+                    .filter { it != [] }
+                    .map { file -> tuple([id: file.baseName], file) },
+                CELLRANGERATAC_MKREF.out.reference
+                    .ifEmpty([])
+                    .filter { it != [] }
+                    .map { file -> tuple([id: file.baseName], file) },
+                CELLRANGER_MKVDJREF.out.reference
+                    .ifEmpty([])
+                    .filter { it != [] }
+                    .map { file -> tuple([id: file.baseName], file) },
+                SPACERANGER_MKREF.out.reference
+                    .ifEmpty([])
+                    .filter { it != [] }
+                    .map { file -> tuple([id: file.baseName], file) },
             )
             .set { ch_for_md5 }
 
@@ -192,12 +311,18 @@ workflow GENOMEPREP {
         ch_rsem_versions = RSEM_PREPAREREFERENCE.out.versions
         ch_bed_versions = CREATE_BED_FILES.out.versions
         ch_db_versions = CREATE_GENES_DB.out.versions
+        ch_mkref_versions = CELLRANGER_MKREF.out.versions
+        ch_mkvdjref_versions = CELLRANGER_MKVDJREF.out.versions
+        ch_spaceranger_versions = SPACERANGER_MKREF.out.versions
+        ch_atac_mkref_versions = CELLRANGERATAC_MKREF.out.versions
         ch_config_versions = CREATE_GENOMES_CONFIG.out.versions
         ch_md5sum_versions = MD5SUM.out.versions
 
         //
         // Add software versions to `ch_versions`
         //
+        ch_versions = Channel.empty()
+
         ch_versions = ch_versions
             .mix(
                 ch_chromosomes_sizes_versions,
@@ -210,6 +335,10 @@ workflow GENOMEPREP {
                 ch_rsem_versions,
                 ch_bed_versions,
                 ch_db_versions,
+                ch_mkref_versions,
+                ch_mkvdjref_versions,
+                ch_spaceranger_versions,
+                ch_atac_mkref_versions,
                 ch_config_versions,
                 ch_md5sum_versions
             ).flatten()
@@ -226,7 +355,7 @@ workflow GENOMEPREP {
             ).set { ch_collated_versions }
 
     emit:
-        versions       = ch_versions                 // channel: [ path(versions.yml) ]
+        versions       = ch_versions                 
         bowtie2_build = BOWTIE2_BUILD.out.index
         bwa_index = BWA_INDEX.out.index
         samtools_index = SAMTOOLS_FAIDX.out.fai

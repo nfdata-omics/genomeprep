@@ -32,6 +32,14 @@ workflow PIPELINE_INITIALISATION {
     outdir            //  string: The output directory where the results will be saved
     fasta             //  string: Path to input samplesheet
     gtf              //  string: Path to GTF file
+    genome_version_name // string: Name of the genome version
+    organism          //  string: Name of the organism
+    current_config_file //  string: Path to the current config file
+    fasta_readme      //  string: Path to FASTA readme file
+    gtf_readme        //  string: Path to GTF readme file
+    vdj_fasta        //  string: Path to VDJ fasta file
+    non_nuclear_contigs //  string: Comma-separated list of non-nuclear contigs to be excluded from ATAC reference generation (e.g.: --non_nuclear_contigs "chrM,chrY")
+    transcription_factors //  string: Comma-separated list of transcription factors
 
     main:
 
@@ -79,16 +87,75 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from gtf file provided through params.gtf
     //
-    ch_gtf = gtf ? 
+    ch_gtf = gtf ?
         Channel.fromPath(gtf).map { file ->
             def meta = file.baseName
             tuple(meta, file)
         } : 
-        Channel.value(tuple("no_gtf", file('no_gtf')))  
+        Channel.value(tuple("no_gtf", file('no_gtf')))
+
+    //
+    // Create channel from genome version name provided through params.genome_version_name
+    //
+    ch_genome_version_name = Channel.value(genome_version_name)
+
+    //
+    // Create channel from organism name provided through params.organism
+    //
+    ch_organism = Channel.value(organism)
+
+    //
+    // Create channel from current config file provided through params.current_config_file
+    //
+    ch_current_config_file = current_config_file ?
+        Channel.fromPath(current_config_file) :
+        Channel.from(file('no_current_config_file', checkIfExists: false))
+
+    //
+    // Create channel from fasta readme file provided through params.fasta_readme
+    //
+    ch_fasta_readme = Channel.from(file(fasta_readme))
+
+    //
+    // Create channel from gtf readme file provided through params.gtf_readme
+    //
+    ch_gtf_readme = gtf_readme ?
+        Channel.from(gtf_readme) :
+        Channel.from(file("no_gtf_readme", checkIfExists: false))
+
+    //
+    // Create channel from vdj fasta file provided through params.vdj_fasta
+    //
+    ch_vdj_fasta = vdj_fasta ?
+        Channel.fromPath(vdj_fasta) :
+        file('no_vdj_fasta', checkIfExists: false)
+
+    //
+    // Create channel for non-nuclear contigs
+    //
+    ch_non_nuclear_contigs = Channel.value(
+        non_nuclear_contigs ? non_nuclear_contigs.split(',') : []
+    )
+
+
+    //
+    // Create channel for transcription factors
+    //
+    ch_transcription_factors = transcription_factors ?
+        Channel.value(transcription_factors) :
+        Channel.value('')
 
     emit:
     fasta = ch_fasta
     gtf = ch_gtf
+    genome_version_name = ch_genome_version_name
+    organism = ch_organism
+    current_config_file = ch_current_config_file
+    fasta_readme = ch_fasta_readme
+    gtf_readme = ch_gtf_readme
+    vdj_fasta = ch_vdj_fasta
+    non_nuclear_contigs = ch_non_nuclear_contigs
+    transcription_factors = ch_transcription_factors
     versions    = ch_versions
 }
 

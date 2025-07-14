@@ -33,6 +33,14 @@ workflow NFCORE_GENOMEPREP {
     take:
     fasta // channel: fasta read in from --fasta
     gtf   // channel: gtf read in from --gtf
+    genome_version_name // string: genome version name read in from --genome_version_name
+    organism // string: organism name read in from --organism
+    current_config_file
+    fasta_readme // channel: fasta readme read in from --fasta_readme
+    gtf_readme // channel: gtf readme read in from --gtf_readme
+    vdj_fasta // channel: vdj fasta read in from --vdj_fasta
+    non_nuclear_contigs // channel: non-nuclear contigs to be excluded from ATAC reference generation (e.g.: --non_nuclear_contigs "chrM,chrY")
+    transcription_factors // channel: transcription factors read in from --transcription_factors (e.g.: --transcription_factors "motifs.pfm")
 
     main:
 
@@ -40,7 +48,7 @@ workflow NFCORE_GENOMEPREP {
     // WORKFLOW: Run pipeline
     //
     GENOMEPREP (
-        fasta, gtf
+        fasta, gtf, genome_version_name, organism, current_config_file, fasta_readme, gtf_readme, vdj_fasta, non_nuclear_contigs, transcription_factors
     )
 }
 /*
@@ -62,7 +70,15 @@ workflow {
         args,
         params.outdir,
         params.fasta,
-        params.gtf
+        params.gtf,
+        params.genome_version_name,
+        params.organism,
+        params.current_config_file,
+        params.fasta_readme,
+        params.gtf_readme,
+        params.vdj_fasta,
+        params.non_nuclear_contigs,
+        params.transcription_factors,
     )
 
     //
@@ -70,7 +86,15 @@ workflow {
     //
     NFCORE_GENOMEPREP (
         PIPELINE_INITIALISATION.out.fasta,
-        PIPELINE_INITIALISATION.out.gtf
+        PIPELINE_INITIALISATION.out.gtf,
+        PIPELINE_INITIALISATION.out.genome_version_name,
+        PIPELINE_INITIALISATION.out.organism,
+        PIPELINE_INITIALISATION.out.current_config_file,
+        PIPELINE_INITIALISATION.out.fasta_readme,
+        PIPELINE_INITIALISATION.out.gtf_readme,
+        PIPELINE_INITIALISATION.out.vdj_fasta,
+        PIPELINE_INITIALISATION.out.non_nuclear_contigs,
+        PIPELINE_INITIALISATION.out.transcription_factors
     )
     //
     // SUBWORKFLOW: Run completion tasks

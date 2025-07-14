@@ -18,10 +18,16 @@ process CREATE_GENOMES_CONFIG {
     path samtools_index
     path star_index
     path bismark_index
+    path chrom_sizes
+    path readme
     path rsem
     path db
     path bed
     path gtf
+    path cellranger
+    path atac
+    path vdj
+    path spaceranger
 
     output:
     path "genomes.config", emit: config
@@ -44,18 +50,29 @@ process CREATE_GENOMES_CONFIG {
     def samtools_abs = "$outdir_abs/$samtools_index/"
     def star_abs = "$outdir_abs/$star_index/"
     def bismark_abs = "$outdir_abs/$bismark_index/"
+    def readme_abs = "$outdir_abs/$readme"
+    def chrom_sizes_abs = "$outdir_abs/$chrom_sizes"
     def gtf_abs = (gtf.name != "no_gtf") ? "$outdir_abs/genes/$gtf" : ""
+    def cellranger_abs = (cellranger.name != "no_cellranger") ? "$outdir_abs/$cellranger" : ""
+    def atac_abs = (atac.name != "no_atac") ? "$outdir_abs/$atac" : ""
+    def vdj_abs = (vdj.name != "no_cellranger_vdj") ? "$outdir_abs/$vdj" : ""
+    def spaceranger_abs = (spaceranger.name != "no_spaceranger") ? "$outdir_abs/$spaceranger" : ""
     def rsem_abs = (rsem.name != "no_rsem") ? "$outdir_abs/$rsem" : ""
     def db_abs = (db.name != "no_genes_db") ? "$outdir_abs/$db" : ""
-    def bed_abs = (bed.name != "no_bed") ? "$outdir_abs/$bed" : ""
+    def bed_abs = (bed.name != "no_bed") ? "$outdir_abs/bed/" : ""
+    def current_config_file_abs = (current_config_file.name != "no_current_config_file") ? current_config_file : ""
 
     def config_file = "${outdir_abs}/genomes.config"
 
     def gtf_args = (gtf.name != 'no_gtf') ? "--gtf $gtf_abs" : ""
+    def cellranger_args = (cellranger.name != 'no_cellranger') ? "--cellranger $cellranger_abs" : ""
+    def atac_args = (atac.name != 'no_atac') ? "--cellranger_atac $atac_abs" : ""
+    def vdj_args = (vdj.name != 'no_cellranger_vdj') ? "--cellranger_vdj $vdj_abs" : ""
+    def spaceranger_args = (spaceranger.name != 'no_spaceranger') ? "--spaceranger $spaceranger_abs" : ""
     def rsem_args = (rsem.name != 'no_rsem') ? "--rsem $rsem_abs" : ""
     def db_args = (db.name != 'no_genes_db') ? "--gene_db $db_abs" : ""
     def bed_args = (bed.name != 'no_bed') ? "--bed12 $bed_abs" : ""
-    
+    def current_config_file_args = (current_config_file.name != 'no_current_config_file') ? "--current_config_file $current_config_file_abs" : ""
     """
     #!/bin/bash
     set -euo pipefail
@@ -68,13 +85,11 @@ process CREATE_GENOMES_CONFIG {
     mkdir -p $outdir_abs/fasta
     cp $fasta $outdir_abs/fasta/
 
-    echo "gtf_args: $gtf_args"
-    echo "rsem_args: $rsem_args"
-
+    echo "Config file: $current_config_file_args"
 
     python3.11 $script_path \
         --genome_version_name $genome_version_name \
-        --current_config_file $current_config_file \
+        $current_config_file_args \
         --fasta $fasta_abs \
         --bwa $bwa_abs \
         --bowtie2 $bowtie2_abs \
@@ -82,6 +97,12 @@ process CREATE_GENOMES_CONFIG {
         --samtools $samtools_abs \
         --star $star_abs \
         --bismark $bismark_abs \
+        --chrom_sizes $chrom_sizes_abs \
+        --readme $readme_abs \
+        $cellranger_args \
+        $atac_args \
+        $vdj_args \
+        $spaceranger_args \
         $gtf_args \
         $rsem_args \
         $db_args \

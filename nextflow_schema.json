@@ -10,13 +10,11 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["genome_version_name", "fasta_readme", "outdir"],
+            "required": ["genome_version_name", "fasta", "fasta_readme", "organism", "outdir"],
             "properties": {
                 "genome_version_name": {
-                    "type": "string"
-                },
-                "current_config_file": {
-                    "type": "string"
+                    "type": "string",
+                    "fa_icon": "fas fa-dna"
                 },
                 "fasta": {
                     "type": "string",
@@ -34,6 +32,21 @@
                     "format": "file-path",
                     "fa_icon": "far fa-file-code"
                 },
+                "organism": {
+                    "type": "string",
+                    "description": "Name of the organism",
+                    "fa_icon": "fas fa-male"
+                },
+                "outdir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "current_config_file": {
+                    "type": "string",
+                    "fa_icon": "far fa-file-code"
+                },
                 "gtf_readme": {
                     "type": "string",
                     "description": "README file containing details about the GTF file.",
@@ -43,11 +56,19 @@
                     "type": "string",
                     "fa_icon": "far fa-file-code"
                 },
-                "outdir": {
+                "vdj_fasta": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
+                    "description": "Path to the reference genome FASTA file from the 10X Genomics fetch-imgt workflo",
+                    "fa_icon": "far fa-file-code"
+                },
+                "non_nuclear_contigs": {
+                    "type": "string",
+                    "description": "Comma-separated list of non-nuclear contigs to be excluded from ATAC reference generation(e.g.: --non_nuclear_contigs \"chrM,chrY\")",
+                    "fa_icon": "fas fa-ellipsis-v"
+                },
+                "transcription_factors": {
+                    "type": "string",
+                    "description": "Transcription factors motifs in JASPAR format to be used by Cellranger ATAC mkref"
                 },
                 "email": {
                     "type": "string",
