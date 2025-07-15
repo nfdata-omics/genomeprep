@@ -21,6 +21,7 @@ process CREATE_GENOMES_CONFIG {
     path chrom_sizes
     path readme
     path rsem
+    path salmon_index
     path db
     path bed
     path gtf
@@ -58,6 +59,7 @@ process CREATE_GENOMES_CONFIG {
     def vdj_abs = (vdj.name != "no_cellranger_vdj") ? "$outdir_abs/$vdj" : ""
     def spaceranger_abs = (spaceranger.name != "no_spaceranger") ? "$outdir_abs/$spaceranger" : ""
     def rsem_abs = (rsem.name != "no_rsem") ? "$outdir_abs/$rsem" : ""
+    def salmon_abs = (salmon_index.name != "no_salmon") ? "$outdir_abs/$salmon_index" : ""
     def db_abs = (db.name != "no_genes_db") ? "$outdir_abs/$db" : ""
     def bed_abs = (bed.name != "no_bed") ? "$outdir_abs/bed/" : ""
     def current_config_file_abs = (current_config_file.name != "no_current_config_file") ? current_config_file : ""
@@ -70,6 +72,7 @@ process CREATE_GENOMES_CONFIG {
     def vdj_args = (vdj.name != 'no_cellranger_vdj') ? "--cellranger_vdj $vdj_abs" : ""
     def spaceranger_args = (spaceranger.name != 'no_spaceranger') ? "--spaceranger $spaceranger_abs" : ""
     def rsem_args = (rsem.name != 'no_rsem') ? "--rsem $rsem_abs" : ""
+    def salmon_args = (salmon_index.name != 'no_salmon') ? "--salmon $salmon_abs" : ""
     def db_args = (db.name != 'no_genes_db') ? "--gene_db $db_abs" : ""
     def bed_args = (bed.name != 'no_bed') ? "--bed12 $bed_abs" : ""
     def current_config_file_args = (current_config_file.name != 'no_current_config_file') ? "--current_config_file $current_config_file_abs" : ""
@@ -105,6 +108,7 @@ process CREATE_GENOMES_CONFIG {
         $spaceranger_args \
         $gtf_args \
         $rsem_args \
+        $salmon_args \
         $db_args \
         $bed_args \
         --output_file $config_file \

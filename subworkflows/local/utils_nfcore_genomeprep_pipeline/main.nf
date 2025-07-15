@@ -32,6 +32,7 @@ workflow PIPELINE_INITIALISATION {
     outdir            //  string: The output directory where the results will be saved
     fasta             //  string: Path to input samplesheet
     gtf              //  string: Path to GTF file
+    transcripts_fasta //  string: Path to transcripts FASTA file
     genome_version_name // string: Name of the genome version
     organism          //  string: Name of the organism
     current_config_file //  string: Path to the current config file
@@ -95,6 +96,13 @@ workflow PIPELINE_INITIALISATION {
         Channel.value(tuple("no_gtf", file('no_gtf')))
 
     //
+    // Create channel from transcripts fasta file provided through params.transcripts_fasta
+    //
+    ch_transcripts_fasta = transcripts_fasta ?
+        Channel.fromPath(transcripts_fasta) :
+        Channel.empty()
+
+    //
     // Create channel from genome version name provided through params.genome_version_name
     //
     ch_genome_version_name = Channel.value(genome_version_name)
@@ -148,6 +156,7 @@ workflow PIPELINE_INITIALISATION {
     emit:
     fasta = ch_fasta
     gtf = ch_gtf
+    transcripts_fasta = ch_transcripts_fasta
     genome_version_name = ch_genome_version_name
     organism = ch_organism
     current_config_file = ch_current_config_file

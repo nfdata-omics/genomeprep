@@ -33,6 +33,7 @@ workflow NFCORE_GENOMEPREP {
     take:
     fasta // channel: fasta read in from --fasta
     gtf   // channel: gtf read in from --gtf
+    transcripts_fasta // channel: transcripts fasta read in from --transcripts_fasta
     genome_version_name // string: genome version name read in from --genome_version_name
     organism // string: organism name read in from --organism
     current_config_file
@@ -48,7 +49,7 @@ workflow NFCORE_GENOMEPREP {
     // WORKFLOW: Run pipeline
     //
     GENOMEPREP (
-        fasta, gtf, genome_version_name, organism, current_config_file, fasta_readme, gtf_readme, vdj_fasta, non_nuclear_contigs, transcription_factors
+        fasta, gtf, transcripts_fasta, genome_version_name, organism, current_config_file, fasta_readme, gtf_readme, vdj_fasta, non_nuclear_contigs, transcription_factors
     )
 }
 /*
@@ -71,6 +72,7 @@ workflow {
         params.outdir,
         params.fasta,
         params.gtf,
+        params.transcripts_fasta,
         params.genome_version_name,
         params.organism,
         params.current_config_file,
@@ -87,6 +89,7 @@ workflow {
     NFCORE_GENOMEPREP (
         PIPELINE_INITIALISATION.out.fasta,
         PIPELINE_INITIALISATION.out.gtf,
+        PIPELINE_INITIALISATION.out.transcripts_fasta,
         PIPELINE_INITIALISATION.out.genome_version_name,
         PIPELINE_INITIALISATION.out.organism,
         PIPELINE_INITIALISATION.out.current_config_file,

@@ -56,6 +56,11 @@
                     "type": "string",
                     "fa_icon": "far fa-file-code"
                 },
+                "transcripts_fasta": {
+                    "type": "string",
+                    "description": "Path to the FASTA file containing reference transcripts to be used by Salmon indexing",
+                    "fa_icon": "far fa-file-code"
+                },
                 "vdj_fasta": {
                     "type": "string",
                     "description": "Path to the reference genome FASTA file from the 10X Genomics fetch-imgt workflo",

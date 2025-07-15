@@ -16,6 +16,7 @@ include { STAR_GENOMEGENERATE } from '../modules/nf-core/star/genomegenerate/mai
 include { GATK4_CREATESEQUENCEDICTIONARY } from '../modules/nf-core/gatk4/createsequencedictionary/main.nf'
 include { BISMARK_GENOMEPREPARATION } from '../modules/nf-core/bismark/genomepreparation/main'
 include { RSEM_PREPAREREFERENCE } from '../modules/nf-core/rsem/preparereference/main' 
+include { SALMON_INDEX } from '../modules/nf-core/salmon/index/main.nf'
 include { MD5SUM } from '../modules/nf-core/md5sum/main'   
 
 include { CREATE_GENES_DB} from '../modules/local/create_genes_db/main.nf'
@@ -37,6 +38,7 @@ workflow GENOMEPREP {
     take:
         fasta // channel: fasta read in from --fasta
         gtf   // channel: gtf read in from --gtf
+        transcripts_fasta // channel: transcripts fasta read in from --transcripts_fasta
         genome_version_name // string: genome version name read in from --genome_version_name
         organism // string: organism name read in from --organism
         current_config_file // string: path to the current config file
@@ -108,6 +110,19 @@ workflow GENOMEPREP {
         // Channel to handle RSEM output
         ch_rsem = RSEM_PREPAREREFERENCE.out.index.ifEmpty {
             file("no_rsem", checkIfExists: false)
+        }
+
+        // 
+        // Run Salmon indexing if transcripts_fasta is provided
+        //
+        SALMON_INDEX(
+            fasta.map { it[1] },
+            transcripts_fasta
+        )
+
+        /// Channel to handle Salmon output
+        ch_salmon = SALMON_INDEX.out.index.ifEmpty {
+            file("no_salmon", checkIfExists: false)
         }
 
         //
@@ -233,6 +248,7 @@ workflow GENOMEPREP {
             COUNT_CHROMOSOMES_SIZES.out.chromosomes_sizes,
             HANDLE_README.out.readme,
             ch_rsem,
+            ch_salmon,
             ch_db,
             ch_bed,
             gtf.collect { it[1] },
@@ -269,6 +285,10 @@ workflow GENOMEPREP {
                     .ifEmpty([])
                     .filter { it != [] } 
                     .map { file -> tuple([id: file.baseName], file) }, 
+                SALMON_INDEX.out.index
+                    .ifEmpty([])
+                    .filter { it != [] }
+                    .map { file -> tuple([id: file.baseName], file) },
                 CREATE_BED_FILES.out.bed
                     .ifEmpty([])
                     .filter { it != [] }
@@ -309,6 +329,7 @@ workflow GENOMEPREP {
         ch_gatk4_versions = GATK4_CREATESEQUENCEDICTIONARY.out.versions
         ch_bismark_versions = BISMARK_GENOMEPREPARATION.out.versions
         ch_rsem_versions = RSEM_PREPAREREFERENCE.out.versions
+        ch_salmon_versions = SALMON_INDEX.out.versions
         ch_bed_versions = CREATE_BED_FILES.out.versions
         ch_db_versions = CREATE_GENES_DB.out.versions
         ch_mkref_versions = CELLRANGER_MKREF.out.versions
@@ -333,6 +354,7 @@ workflow GENOMEPREP {
                 ch_gatk4_versions,
                 ch_bismark_versions,
                 ch_rsem_versions,
+                ch_salmon_versions,
                 ch_bed_versions,
                 ch_db_versions,
                 ch_mkref_versions,
