@@ -112,6 +112,23 @@ workflow {
     )
 }
 
+workflow.onComplete {
+    def outdir = params.outdir
+    def cmd = """
+        find ${outdir} -maxdepth 3 -type f -not -path "${outdir}/pipeline_info/*" -exec chmod 444 {} \\;
+    """
+
+    def proc = ["bash", "-c", cmd].execute()
+    proc.in.eachLine { println "[chmod] $it" }
+    proc.waitFor()
+
+    if (proc.exitValue() == 0) {
+        println "[onComplete] Permissões setadas com sucesso."
+    } else {
+        println "[onComplete] Falha ao setar permissões."
+    }
+}
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     THE END
