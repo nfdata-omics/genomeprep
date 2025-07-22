@@ -123,9 +123,9 @@ workflow.onComplete {
     proc.waitFor()
 
     if (proc.exitValue() == 0) {
-        println "[onComplete] Permissões setadas com sucesso."
+        println "[onComplete] File permissions changed successfully."
     } else {
-        println "[onComplete] Falha ao setar permissões."
+        println "[onComplete] Failed to change file permissions."
     }
 }
 

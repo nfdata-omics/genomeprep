@@ -1,7 +1,11 @@
 process CREATE_BED_FILES {
     
-    container 'docker.io/ubuntu:22.04'
-    containerOptions '--user root'
+    container = workflow.containerEngine == 'singularity' ?
+        "${baseDir}/containers/genes_db-test.sif" :
+        'gitlab.fht.org:5050/nfdata-omics/genes-db:test'
+
+    containerOptions = workflow.containerEngine == 'docker' ? 
+        '--platform=linux/amd64 --entrypoint=""' : ''
 
     tag "$db"
 
@@ -17,47 +21,57 @@ process CREATE_BED_FILES {
 
     script:
     """
-    apt-get update && apt-get install -y sqlite3
+    #!/bin/bash
+    set -euo pipefail
 
     mkdir -p bed
 
-    sqlite3 \
-        $db \
-        -separator \$'\t' \
-        -header \
-        "SELECT chrom, \
-                start - 1 AS chromStart, \
-                end AS chromEnd, \
-                name, \
-                '.' AS score, \
-                CASE strand WHEN 1 THEN '+' WHEN -1 THEN '-' END AS strand \
-                FROM Genes" \
-        > bed/genes.bed
+    python3.11 -c "
+import sqlite3
 
-    sqlite3 \
-        $db \
-        -separator \$'\t' \
-        -header \
-        "SELECT chrom, \
-                CASE \
-                    WHEN strand = 1 THEN MAX(tss - 2000 - 1, 0) \
-                    WHEN strand = -1 THEN tss + 1 \
-                END AS chromStart, \
-                CASE \
-                    WHEN strand = 1 THEN tss - 1 \
-                    WHEN strand = -1 THEN tss + 2001 \
-                END AS chromEnd, \
-                name, \
-                '.' AS score, \
-                CASE strand WHEN 1 THEN '+' WHEN -1 THEN '-' END AS strand \
-                FROM Genes" \
-        > bed/promoters.bed
-                
+conn = sqlite3.connect('$db')
+cursor = conn.cursor()
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        sqlite: \$(sqlite3 --version | sed -e "s/SQLite version //g" | cut -d' ' -f1)
-    END_VERSIONS
+genes_query = '''
+SELECT chrom,
+       start - 1 AS chromStart,
+       end AS chromEnd,
+       name,
+       '.' AS score,
+       CASE strand WHEN 1 THEN '+' WHEN -1 THEN '-' END AS strand
+FROM Genes
+'''
+
+promoters_query = '''
+SELECT chrom,
+       CASE
+           WHEN strand = 1 THEN MAX(tss - 2000 - 1, 0)
+           WHEN strand = -1 THEN tss + 1
+       END AS chromStart,
+       CASE
+           WHEN strand = 1 THEN tss - 1
+           WHEN strand = -1 THEN tss + 2001
+       END AS chromEnd,
+       name,
+       '.' AS score,
+       CASE strand WHEN 1 THEN '+' WHEN -1 THEN '-' END AS strand
+FROM Genes
+'''
+
+with open('bed/genes.bed', 'w') as f:
+    f.write('chrom\\tchromStart\\tchromEnd\\tname\\tscore\\tstrand\\n')
+    for row in cursor.execute(genes_query):
+        f.write('\\t'.join(map(str, row)) + '\\n')
+
+with open('bed/promoters.bed', 'w') as f:
+    f.write('chrom\\tchromStart\\tchromEnd\\tname\\tscore\\tstrand\\n')
+    for row in cursor.execute(promoters_query):
+        f.write('\\t'.join(map(str, row)) + '\\n')
+
+conn.close()
+"
+
+    echo "${task.process}:" > versions.yml
+    echo "  python: \$(python3.11 --version | cut -d' ' -f2)" >> versions.yml
     """
-
 }

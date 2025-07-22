@@ -2,8 +2,12 @@ process CREATE_GENES_DB {
 
     publishDir "${params.outdir}/genes_db", mode: 'copy'
 
-    container 'gitlab.fht.org:5050/nfdata-omics/genes-db:test'
-    containerOptions = '--platform=linux/amd64 --entrypoint=""'
+    container = workflow.containerEngine == 'singularity' ?
+    "${baseDir}/containers/genes_db-test.sif" :
+    'gitlab.fht.org:5050/nfdata-omics/genes-db:test'
+
+    containerOptions = workflow.containerEngine == 'docker' ? 
+        '--platform=linux/amd64 --entrypoint=""' : ''
 
 
     tag "$gtf"
