@@ -1,6 +1,6 @@
 process CREATE_GENOMES_CONFIG {
 
-    publishDir "${params.outdir}/genomes_config", mode: 'copy'
+    publishDir "genomes_config", mode: 'copy'
 
     tag "$genome_version_name"
 
@@ -31,7 +31,7 @@ process CREATE_GENOMES_CONFIG {
     path spaceranger
 
     output:
-    path "genomes.config", emit: config
+    path "genomes_config", emit: config
     path "versions.yml", emit: versions
 
     when:
@@ -64,7 +64,7 @@ process CREATE_GENOMES_CONFIG {
     def bed_abs = (bed.name != "no_bed") ? "$outdir_abs/bed/" : ""
     def current_config_file_abs = (current_config_file.name != "no_current_config_file") ? current_config_file : ""
 
-    def config_file = "${outdir_abs}/genomes.config"
+    def config_file = "genomes_config/genomes.config"
 
     def gtf_args = (gtf.name != 'no_gtf') ? "--gtf $gtf_abs" : ""
     def cellranger_args = (cellranger.name != 'no_cellranger') ? "--cellranger $cellranger_abs" : ""
@@ -79,6 +79,8 @@ process CREATE_GENOMES_CONFIG {
     """
     #!/bin/bash
     set -euo pipefail
+
+    mkdir -p genomes_config
 
     if [ "$gtf" != "no_gtf" ]; then
         mkdir -p $outdir_abs/genes
