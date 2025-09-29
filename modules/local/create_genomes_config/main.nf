@@ -1,13 +1,11 @@
 process CREATE_GENOMES_CONFIG {
 
-    publishDir "genomes_config", mode: 'copy'
+    publishDir "${params.outdir}/genomes_config", mode: 'copy'
 
     tag "$genome_version_name"
 
     conda "${moduleDir}/environment.yml" 
-    container = workflow.containerEngine == 'singularity' ?
-     "${baseDir}/containers/genome-config_test.sif" :
-     'gitlab.fht.org:5050/nfdata-omics/genome-config:test'
+    container = 'gitlab.fht.org:5050/nfdata-omics/genome-config:test'
     input:
     val genome_version_name
     path current_config_file
@@ -45,23 +43,23 @@ process CREATE_GENOMES_CONFIG {
     def outdir_abs = java.nio.file.Paths.get(params.outdir.toString()).toAbsolutePath().toString()
 
     def fasta_abs = "$outdir_abs/fasta/$fasta"
-    def bwa_abs = "$outdir_abs/$bwa_index/"
-    def bowtie2_abs = "$outdir_abs/$bowtie2_index/"
-    def gatk_abs = "$outdir_abs/$gatk4_dict"
-    def samtools_abs = "$outdir_abs/$samtools_index/"
-    def star_abs = "$outdir_abs/$star_index/"
-    def bismark_abs = "$outdir_abs/$bismark_index/"
-    def readme_abs = "$outdir_abs/$readme"
-    def chrom_sizes_abs = "$outdir_abs/$chrom_sizes"
+    def bwa_abs = "$outdir_abs/$bwa_index/bwa/"
+    def bowtie2_abs = "$outdir_abs/$bowtie2_index/bowtie2/"
+    def gatk_abs = "$outdir_abs/gatk4/$gatk4_dict"
+    def samtools_abs = "$outdir_abs/samtools/$samtools_index"
+    def star_abs = "$outdir_abs/$star_index/star/"
+    def bismark_abs = "$outdir_abs/bismark/$bismark_index/"
+    def readme_abs = "$outdir_abs/readme/$readme"
+    def chrom_sizes_abs = "$outdir_abs/chromosomes_sizes/$chrom_sizes"
     def gtf_abs = (gtf.name != "no_gtf") ? "$outdir_abs/genes/$gtf" : ""
-    def cellranger_abs = (cellranger.name != "no_cellranger") ? "$outdir_abs/$cellranger" : ""
-    def atac_abs = (atac.name != "no_atac") ? "$outdir_abs/$atac" : ""
-    def vdj_abs = (vdj.name != "no_cellranger_vdj") ? "$outdir_abs/$vdj" : ""
-    def spaceranger_abs = (spaceranger.name != "no_spaceranger") ? "$outdir_abs/$spaceranger" : ""
-    def rsem_abs = (rsem.name != "no_rsem") ? "$outdir_abs/$rsem" : ""
-    def salmon_abs = (salmon_index.name != "no_salmon") ? "$outdir_abs/$salmon_index" : ""
-    def db_abs = (db.name != "no_genes_db") ? "$outdir_abs/$db" : ""
-    def bed_abs = (bed.name != "no_bed") ? "$outdir_abs/bed/" : ""
+    def cellranger_abs = (cellranger.name != "no_cellranger") ? "$outdir_abs/cellranger/$cellranger/" : ""
+    def atac_abs = (atac.name != "no_atac") ? "$outdir_abs/cellrangeratac/$atac/" : ""
+    def vdj_abs = (vdj.name != "no_cellranger_vdj") ? "$outdir_abs/cellranger/$vdj/" : ""
+    def spaceranger_abs = (spaceranger.name != "no_spaceranger") ? "$outdir_abs/spaceranger/$spaceranger/" : ""
+    def rsem_abs = (rsem.name != "no_rsem") ? "$outdir_abs/rsem/$rsem/" : ""
+    def salmon_abs = (salmon_index.name != "no_salmon") ? "$outdir_abs/salmon/$salmon_index/" : ""
+    def db_abs = (db.name != "no_genes_db") ? "$outdir_abs/genes_db/$db" : ""
+    def bed_abs = (bed.name != "no_bed") ? "$outdir_abs/bed_files/bed/genes.bed" : ""
     def current_config_file_abs = (current_config_file.name != "no_current_config_file") ? current_config_file : ""
 
     def config_file = "genomes_config/genomes.config"

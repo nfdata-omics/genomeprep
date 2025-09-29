@@ -41,7 +41,7 @@ process CELLRANGER_MKREF {
         --nthreads=${task.cpus} \\
         $args
 
-    mv $reference_name "\$(reference_name)_cellranger/"
+    mv $reference_name/* "${reference_name}_cellranger/"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

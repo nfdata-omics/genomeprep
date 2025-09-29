@@ -12,3 +12,4 @@ null/
 __pycache__/
 .pytest_cache
 genomes.config
+containers/*

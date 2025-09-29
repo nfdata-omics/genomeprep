@@ -38,7 +38,7 @@ process SPACERANGER_MKREF {
         --nthreads=${task.cpus} \\
         $args
 
-    mv $reference_name "\$(reference_name)_spaceranger/"
+    mv $reference_name/* "${reference_name}_spaceranger/"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

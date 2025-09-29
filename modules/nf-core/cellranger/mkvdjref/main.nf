@@ -41,7 +41,7 @@ process CELLRANGER_MKVDJREF {
         --localmem=${task.memory.toGiga()} \\
         $args
 
-    mv $reference_name "\$(reference_name)_vdj/"
+    mv $reference_name/* "${reference_name}_vdj/"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -1,4 +1,6 @@
 process CREATE_BED_FILES {
+
+    publishDir "${params.outdir}/bed_files/", mode: 'copy'
     
     container = workflow.containerEngine == 'singularity' ?
         "${baseDir}/containers/genes_db-test.sif" :

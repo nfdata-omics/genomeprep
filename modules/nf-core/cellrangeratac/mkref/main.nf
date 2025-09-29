@@ -35,7 +35,7 @@ process CELLRANGERATAC_MKREF {
         --config=reference_config.json \\
         $args
 
-    mv "${reference_name}" "${reference_name}_atac/"
+    mv ${reference_name}/* "${reference_name}_atac/"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
