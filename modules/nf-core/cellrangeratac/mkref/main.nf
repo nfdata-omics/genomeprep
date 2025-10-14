@@ -1,12 +1,16 @@
 process CELLRANGERATAC_MKREF {
     tag "$fasta"
-    label 'process_medium'
+    label 'process_high'
 
     container "nf-core/cellranger-atac:2.1.0"
 
     input:
     path fasta
-    val reference_config
+    path gtf
+    val organism
+    val genome_name
+    val non_nuclear_contigs
+    path transcription_factors
     val reference_name
 
     output:
@@ -22,11 +26,20 @@ process CELLRANGERATAC_MKREF {
         exit 1, "CELLRANGERATAC_MKREF module does not support Conda. Please use Docker / Singularity / Podman instead."
     }
 
-    def json_config = groovy.json.JsonOutput.toJson(reference_config)
-
     def args = task.ext.args ?: ''
+    def has_motifs = transcription_factors && transcription_factors.name != "no_motifs"
+    def has_contigs = non_nuclear_contigs && non_nuclear_contigs.size() > 0
+    
     """
-    echo '${json_config}' > reference_config.json
+    # Build the configuration JSON in shell to use actual file paths
+    cat > reference_config.json << EOF
+{
+    "organism": "${organism}",
+    "genome": ["${genome_name}"],
+    "input_fasta": ["${fasta}"],
+    "input_gtf": ["${gtf}"]${has_motifs ? ',\n    "input_motifs": "' + transcription_factors + '"' : ''}${has_contigs ? ',\n    "non_nuclear_contigs": ["' + non_nuclear_contigs.join('", "') + '"]' : ''}
+}
+EOF
 
     mkdir -p "${reference_name}_atac/"
 
@@ -37,10 +50,10 @@ process CELLRANGERATAC_MKREF {
 
     mv ${reference_name}/* "${reference_name}_atac/"
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
-    END_VERSIONS
+cat <<-END_VERSIONS > versions.yml
+"${task.process}":
+    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
+END_VERSIONS
     """
 
     stub:
@@ -60,9 +73,9 @@ process CELLRANGERATAC_MKREF {
     mkdir -p "${reference_name}/regions/"
     touch ${reference_name}/regions/{motifs.pfm,transcripts.bed,tss.bed}
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
-    END_VERSIONS
+cat <<-END_VERSIONS > versions.yml
+"${task.process}":
+    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
+END_VERSIONS
     """
 }

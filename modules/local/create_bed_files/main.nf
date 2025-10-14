@@ -2,9 +2,7 @@ process CREATE_BED_FILES {
 
     publishDir "${params.outdir}/bed_files/", mode: 'copy'
     
-    container = workflow.containerEngine == 'singularity' ?
-        "${baseDir}/containers/genes_db-test.sif" :
-        'gitlab.fht.org:5050/nfdata-omics/genes-db:test'
+    container = 'gitlab.fht.org:5050/nfdata-omics/genes-db:test'
 
     containerOptions = workflow.containerEngine == 'docker' ? 
         '--platform=linux/amd64 --entrypoint=""' : ''
@@ -73,7 +71,9 @@ with open('bed/promoters.bed', 'w') as f:
 conn.close()
 "
 
-    echo "${task.process}:" > versions.yml
-    echo "  python: \$(python3.11 --version | cut -d' ' -f2)" >> versions.yml
+cat <<-END_VERSIONS > versions.yml
+"${task.process}":
+    python: \$(python3.11 --version | cut -d' ' -f2)
+END_VERSIONS
     """
 }

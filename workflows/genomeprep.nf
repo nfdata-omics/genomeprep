@@ -195,37 +195,13 @@ workflow GENOMEPREP {
         //
         // Create Cell Ranger ATAC reference
         //
-        fasta.map { it[1] }
-            .combine(ch_gtf_valid.map { it[1] })
-            .combine(non_nuclear_contigs)
-            .map { files ->
-
-                def fasta_file = files[0]
-                def gtf_file = files[1]
-                def contigs = files[2]
-
-                def config = [
-                    organism: organism.val,
-                    genome: [genome_version_name.val],  
-                    input_fasta: [fasta_file.toString()],
-                    input_gtf: [gtf_file.toString()],
-                ]
-
-                if (transcription_factors && transcription_factors.isEmpty() == false) {
-                    config.input_motifs = transcription_factors
-                }
-
-                if (contigs && contigs.size() > 0) {
-                    config.non_nuclear_contigs = contigs
-                }
-
-                return config
-            }
-            .set { ch_reference_config }
-
         CELLRANGERATAC_MKREF(
             fasta.map { it[1] },
-            ch_reference_config,
+            ch_gtf_valid.map { it[1] },
+            organism,
+            genome_version_name,
+            non_nuclear_contigs,
+            transcription_factors,
             genome_version_name
         )
 
