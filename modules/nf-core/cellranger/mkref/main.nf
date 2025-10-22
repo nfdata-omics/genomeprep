@@ -1,7 +1,4 @@
 process CELLRANGER_MKREF {
-
-    time = '48.h'
-
     tag "$fasta"
     label 'process_high'
 
@@ -13,7 +10,7 @@ process CELLRANGER_MKREF {
     val reference_name
 
     output:
-    path "${reference_name}_cellranger", emit: reference
+    path "${reference_name}", emit: reference
     path "versions.yml"     , emit: versions
 
     when:
@@ -29,8 +26,6 @@ process CELLRANGER_MKREF {
     // --nthreads is passed to the STAR index generation.
     // see also https://github.com/nf-core/scrnaseq/issues/329
     """
-    mkdir -p "${reference_name}_cellranger"
-
     cellranger \\
         mkref \\
         --genome=$reference_name \\
@@ -40,8 +35,6 @@ process CELLRANGER_MKREF {
         --localmem=${task.memory.toGiga()} \\
         --nthreads=${task.cpus} \\
         $args
-
-    mv $reference_name/* "${reference_name}_cellranger/"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

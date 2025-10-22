@@ -76,6 +76,7 @@ workflow GENOMEPREP {
         // Run samtools indexing
         //
         SAMTOOLS_FAIDX(fasta,
+                       tuple("", file("no_fai", checkIfExists: false)),
                        Channel.from(false))
 
         //

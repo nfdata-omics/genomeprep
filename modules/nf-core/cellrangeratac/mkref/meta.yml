@@ -25,22 +25,28 @@ input:
       description: Reference transcriptome GTF file
       pattern: "*.gtf"
       ontologies: []
-  - motifs:
+  - organism:
+      type: string
+      description: Organism name (e.g., "Homo sapiens")
+      pattern: .+
+  - genome_name:
+      type: string
+      description: Name of the reference genome (e.g., "GRCh38")
+      pattern: .+
+  - non_nuclear_contigs:
+      type: list
+      description: List of non-nuclear contigs to include (e.g., ["chr1", "chr2"])
+      items:
+        type: string
+  - transcription_factors:
       type: file
       description: Sequence motif file (e.g., of transcription factors)
       pattern: "*.txt"
       ontologies: []
-  - reference_config:
-      type: file
-      description: JSON-like config file holding organism, genome, reference fasta path,
-        reference annotation gtf path, contigs that should be excluded and sequence
-        format motif file path
-      pattern: config
-      ontologies: []
   - reference_name:
       type: string
       description: The name to give the new reference folder
-      pattern: str
+      pattern: .+
 output:
   reference:
     - ${reference_name}:

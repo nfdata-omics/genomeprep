@@ -1,0 +1,90 @@
+Changes in component 'nf-core/cellrangeratac/mkref'
+Changes in 'cellrangeratac/mkref/meta.yml':
+--- modules/nf-core/cellrangeratac/mkref/meta.yml
++++ modules/nf-core/cellrangeratac/mkref/meta.yml
+@@ -25,22 +25,28 @@
+       description: Reference transcriptome GTF file
+       pattern: "*.gtf"
+       ontologies: []
+-  - motifs:
++  - organism:
++      type: string
++      description: Organism name (e.g., "Homo sapiens")
++      pattern: .+
++  - genome_name:
++      type: string
++      description: Name of the reference genome (e.g., "GRCh38")
++      pattern: .+
++  - non_nuclear_contigs:
++      type: list
++      description: List of non-nuclear contigs to include (e.g., ["chr1", "chr2"])
++      items:
++        type: string
++  - transcription_factors:
+       type: file
+       description: Sequence motif file (e.g., of transcription factors)
+       pattern: "*.txt"
+       ontologies: []
+-  - reference_config:
+-      type: file
+-      description: JSON-like config file holding organism, genome, reference fasta path,
+-        reference annotation gtf path, contigs that should be excluded and sequence
+-        format motif file path
+-      pattern: config
+-      ontologies: []
+   - reference_name:
+       type: string
+       description: The name to give the new reference folder
+-      pattern: str
++      pattern: .+
+ output:
+   reference:
+     - ${reference_name}:
+
+Changes in 'cellrangeratac/mkref/main.nf':
+--- modules/nf-core/cellrangeratac/mkref/main.nf
++++ modules/nf-core/cellrangeratac/mkref/main.nf
+@@ -7,8 +7,10 @@
+     input:
+     path fasta
+     path gtf
+-    path motifs
+-    path reference_config
++    val organism
++    val genome_name
++    val non_nuclear_contigs
++    path transcription_factors
+     val reference_name
+ 
+     output:
+@@ -23,11 +25,25 @@
+     if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
+         exit 1, "CELLRANGERATAC_MKREF module does not support Conda. Please use Docker / Singularity / Podman instead."
+     }
++
+     def args = task.ext.args ?: ''
++    def has_motifs = transcription_factors && transcription_factors.name != "no_motifs"
++    def has_contigs = non_nuclear_contigs && non_nuclear_contigs.size() > 0
++    
+     """
++    # Build the configuration JSON in shell to use actual file paths
++    cat > reference_config.json << EOF
++{
++    "organism": "${organism}",
++    "genome": ["${genome_name}"],
++    "input_fasta": ["${fasta}"],
++    "input_gtf": ["${gtf}"]${has_motifs ? ',\n    "input_motifs": "' + transcription_factors + '"' : ''}${has_contigs ? ',\n    "non_nuclear_contigs": ["' + non_nuclear_contigs.join('", "') + '"]' : ''}
++}
++EOF
++
+     cellranger-atac \\
+         mkref \\
+-        --config=$reference_config \\
++        --config=reference_config.json \\
+         $args
+ 
+     cat <<-END_VERSIONS > versions.yml
+
+'modules/nf-core/cellrangeratac/mkref/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/cellrangeratac/mkref/tests/main.nf.test' is unchanged
+************************************************************

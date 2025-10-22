@@ -10,9 +10,6 @@
 
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
-include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
-include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
-include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 
@@ -151,7 +148,7 @@ workflow PIPELINE_INITIALISATION {
     //
     ch_transcription_factors = transcription_factors ?
         Channel.value(transcription_factors) :
-        Channel.value('')
+        Channel.from(file('no_motifs', checkIfExists: false))
 
     emit:
     fasta = ch_fasta
