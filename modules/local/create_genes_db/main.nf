@@ -4,7 +4,7 @@ process CREATE_GENES_DB {
 
     container = 'gitlab.fht.org:5050/nfdata-omics/genes-db:test'
 
-    containerOptions = workflow.containerEngine == 'docker' ? 
+    containerOptions = workflow.containerEngine == 'docker' ?
         '--platform=linux/amd64 --entrypoint=""' : ''
 
 

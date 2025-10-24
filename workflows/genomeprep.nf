@@ -16,9 +16,9 @@ include { SAMTOOLS_FAIDX } from '../modules/nf-core/samtools/faidx/main.nf'
 include { STAR_GENOMEGENERATE } from '../modules/nf-core/star/genomegenerate/main'
 include { GATK4_CREATESEQUENCEDICTIONARY } from '../modules/nf-core/gatk4/createsequencedictionary/main.nf'
 include { BISMARK_GENOMEPREPARATION } from '../modules/nf-core/bismark/genomepreparation/main'
-include { RSEM_PREPAREREFERENCE } from '../modules/nf-core/rsem/preparereference/main' 
+include { RSEM_PREPAREREFERENCE } from '../modules/nf-core/rsem/preparereference/main'
 include { SALMON_INDEX } from '../modules/nf-core/salmon/index/main.nf'
-include { MD5SUM } from '../modules/nf-core/md5sum/main'   
+include { MD5SUM } from '../modules/nf-core/md5sum/main'
 
 include { CREATE_GENES_DB} from '../modules/local/create_genes_db/main.nf'
 include { CREATE_BED_FILES } from '../modules/local/create_bed_files/main.nf'
@@ -83,7 +83,7 @@ workflow GENOMEPREP {
         //
         // Run STAR indexing
         //
-        STAR_GENOMEGENERATE(fasta, 
+        STAR_GENOMEGENERATE(fasta,
                             gtf)
 
         //
@@ -114,7 +114,7 @@ workflow GENOMEPREP {
             file("no_rsem", checkIfExists: false)
         }
 
-        // 
+        //
         // Run Salmon indexing if transcripts_fasta is provided
         //
         SALMON_INDEX(
@@ -164,7 +164,7 @@ workflow GENOMEPREP {
         CELLRANGER_MKREF(
             fasta.map { it[1] },
             CELLRANGER_MKGTF.out.gtf,
-            genome_version_name        
+            genome_version_name
         )
 
         // Channel to handle CELLRANGER_MKREF output
@@ -268,8 +268,8 @@ workflow GENOMEPREP {
                     .map { file -> tuple([id: file.baseName], file) },
                 RSEM_PREPAREREFERENCE.out.index
                     .ifEmpty([])
-                    .filter { it != [] } 
-                    .map { file -> tuple([id: file.baseName], file) }, 
+                    .filter { it != [] }
+                    .map { file -> tuple([id: file.baseName], file) },
                 SALMON_INDEX.out.index
                     .ifEmpty([])
                     .filter { it != [] }
@@ -304,7 +304,7 @@ workflow GENOMEPREP {
         MD5SUM(ch_for_md5, false)
 
         //
-        // Retrieve versions.yml output of each process 
+        // Retrieve versions.yml output of each process
         //
         ch_chromosomes_sizes_versions = COUNT_CHROMOSOMES_SIZES.out.versions
         ch_bowtie2_versions = BOWTIE2_BUILD.out.versions
@@ -362,13 +362,13 @@ workflow GENOMEPREP {
             ).set { ch_collated_versions }
 
     emit:
-        versions       = ch_versions                 
+        versions       = ch_versions
         bowtie2_build = BOWTIE2_BUILD.out.index
         bwa_index = BWA_INDEX.out.index
         samtools_index = SAMTOOLS_FAIDX.out.fai
         star_index = STAR_GENOMEGENERATE.out.index
         gatk4_dict = GATK4_CREATESEQUENCEDICTIONARY.out.dict
-        genomes_config = CREATE_GENOMES_CONFIG.out.config 
+        genomes_config = CREATE_GENOMES_CONFIG.out.config
 
 }
 

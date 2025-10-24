@@ -89,7 +89,7 @@ workflow PIPELINE_INITIALISATION {
         Channel.fromPath(gtf).map { file ->
             def meta = file.baseName
             tuple(meta, file)
-        } : 
+        } :
         Channel.value(tuple("no_gtf", file('no_gtf')))
 
     //
