@@ -5,6 +5,7 @@
 */
 include { HANDLE_README} from '../modules/local/handle_readme/main.nf'
 include { COUNT_CHROMOSOMES_SIZES } from '../modules/local/count_chromosomes_sizes/main.nf'
+include { CELLRANGER_MKGTF } from '../modules/nf-core/cellranger/mkgtf/main.nf'
 include { CELLRANGER_MKREF } from '../modules/nf-core/cellranger/mkref/main'
 include { CELLRANGERATAC_MKREF } from '../modules/nf-core/cellrangeratac/mkref/main'
 include { CELLRANGER_MKVDJREF } from '../modules/nf-core/cellranger/mkvdjref/main'
@@ -151,11 +152,18 @@ workflow GENOMEPREP {
         }
 
         //
+        // Filter GTF using Cell Ranger mkgtf
+        //
+        CELLRANGER_MKGTF(
+            ch_gtf_valid.map { it[1] }
+        )
+
+        //
         // Create Cell Ranger reference
         //
         CELLRANGER_MKREF(
             fasta.map { it[1] },
-            ch_gtf_valid.map { it[1] },
+            CELLRANGER_MKGTF.out.gtf,
             genome_version_name        
         )
 

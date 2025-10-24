@@ -8,10 +8,17 @@ lint:
     - assets/sendmail_template.txt
     - .github/CONTRIBUTING.md
     - assets/sendmail_template.txt
+    - modules/nf-core/cellrangeratac/mkref/meta.yml
+    - modules/nf-core/cellrangeratac/mkref/main.nf
   multiqc_config: false
   files_exist:
     - assets/multiqc_config.yml
     - assets/multiqc_config.yml
+  correct_meta_inputs:
+    - modules/nf-core/cellrangeratac/mkref/meta.yml
+  modules:
+    cellrangeratac/mkref:
+      - all_tests
 
 template:
   org: nf-core
