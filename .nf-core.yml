@@ -10,6 +10,7 @@ lint:
     - assets/sendmail_template.txt
     - modules/nf-core/cellrangeratac/mkref/meta.yml
     - modules/nf-core/cellrangeratac/mkref/main.nf
+    - assets/*.png
   multiqc_config: false
   files_exist:
     - assets/multiqc_config.yml
