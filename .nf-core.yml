@@ -16,13 +16,11 @@ lint:
   modules:
     cellrangeratac/mkref:
       - all_tests
-
 nf_core_version: 3.4.1
 repository_type: pipeline
 template:
   author: Leandro Tiburske
-  description: A pipeline to prepare reference genomes and annotations for non-model
-    organisms.
+  description: A pipeline to prepare reference genomes and annotations for non-model organisms.
   force: false
   is_nfcore: true
   name: genomeprep
@@ -31,4 +29,4 @@ template:
   skip_features:
     - multiqc
     - fastqc
-  version: 1.0.0dev
+  version: 0.1.0dev
