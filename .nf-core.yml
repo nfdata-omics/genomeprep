@@ -1,8 +1,7 @@
-repository_type: pipeline
-
-nf_core_version: 3.4.1
-
 lint:
+  files_exist:
+    - assets/multiqc_config.yml
+    - assets/multiqc_config.yml
   files_unchanged:
     - .github/CONTRIBUTING.md
     - assets/sendmail_template.txt
@@ -21,15 +20,18 @@ lint:
     cellrangeratac/mkref:
       - all_tests
 
+nf_core_version: 3.4.1
+repository_type: pipeline
 template:
-  org: nf-core
-  name: genomeprep
-  description: A pipeline to prepare reference genomes and annotations for non-model organisms.
   author: Leandro Tiburske
-  version: 3.4.1
-  force: true
+  description: A pipeline to prepare reference genomes and annotations for non-model
+    organisms.
+  force: false
+  is_nfcore: true
+  name: genomeprep
+  org: nfdata-omics
   outdir: .
   skip_features:
     - multiqc
     - fastqc
-  is_nfcore: true
+  version: 1.0.0dev

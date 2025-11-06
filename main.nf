@@ -81,6 +81,9 @@ workflow {
         params.vdj_fasta,
         params.non_nuclear_contigs,
         params.transcription_factors,
+        params.help,
+        params.help_full,
+        params.show_hidden
     )
 
     //
