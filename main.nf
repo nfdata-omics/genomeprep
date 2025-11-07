@@ -1,11 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/genomeprep
+    nfdata-omics/genomeprep
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/genomeprep
-    Website: https://nf-co.re/genomeprep
-    Slack  : https://nfcore.slack.com/channels/genomeprep
+    Github : https://github.com/nfdata-omics/genomeprep
 ----------------------------------------------------------------------------------------
 */
 
@@ -18,19 +16,6 @@
 include { GENOMEPREP  } from './workflows/genomeprep'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genomeprep_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genomeprep_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_genomeprep_pipeline'
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    GENOME PARAMETER VALUES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -40,7 +25,7 @@ params.fasta = getGenomeAttribute('fasta')
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow NFCORE_GENOMEPREP {
+workflow NFDATAOMICS_GENOMEPREP {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -81,7 +66,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_GENOMEPREP (
+    NFDATAOMICS_GENOMEPREP (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //

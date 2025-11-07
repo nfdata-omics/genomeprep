@@ -1,6 +1,15 @@
-nf_core_version: 3.4.1
-
 lint:
+  files_exist:
+    - conf/igenomes.config
+    - conf/igenomes_ignored.config
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-genomeprep_logo_light.png
+    - docs/images/nf-core-genomeprep_logo_light.png
+    - docs/images/nf-core-genomeprep_logo_dark.png
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/workflows/awstest.yml
+    - .github/workflows/awsfulltest.yml
+    - assets/multiqc_config.yml
   files_unchanged:
     - .github/CONTRIBUTING.md
     - CODE_OF_CONDUCT.md
@@ -14,29 +23,19 @@ lint:
     - docs/README.md
     - .github/CONTRIBUTING.md
     - assets/sendmail_template.txt
+  multiqc_config: false
   nextflow_config:
     - manifest.name
     - manifest.homePage
-  multiqc_config: false
-  files_exist:
-    - conf/igenomes.config
-    - conf/igenomes_ignored.config
-    - CODE_OF_CONDUCT.md
-    - assets/nf-core-genomeprep_logo_light.png
-    - docs/images/nf-core-genomeprep_logo_light.png
-    - docs/images/nf-core-genomeprep_logo_dark.png
-    - .github/ISSUE_TEMPLATE/config.yml
-    - .github/workflows/awstest.yml
-    - .github/workflows/awsfulltest.yml
-    - assets/multiqc_config.yml
-
+nf_core_version: 3.4.1
 template:
-  org: nfdata-omics
-  name: genomeprep
-  description: A pipeline to prepare reference genomes and annotations for non-model organisms.
   author: Leandro Tiburske
-  version: 1.0.0dev
-  force: true
+  description: A pipeline to prepare reference genomes and annotations for non-model
+    organisms.
+  force: false
+  is_nfcore: false
+  name: genomeprep
+  org: nfdata-omics
   outdir: .
   skip_features:
     - igenomes
@@ -44,4 +43,4 @@ template:
     - fastqc
     - gpu
     - codespaces
-  is_nfcore: false
+  version: 1.0.0dev
