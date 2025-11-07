@@ -393,7 +393,7 @@ workflow GENOMEPREP {
         softwareVersionsToYAML(ch_versions)
             .collectFile(
                 storeDir: "${params.outdir}/pipeline_info",
-                name: 'nf_core_'  +  'genomeprep_software_'  + 'versions.yml',
+                name: 'genomeprep_software_'  + 'versions.yml',
                 sort: true,
                 newLine: true
             ).set { ch_collated_versions }

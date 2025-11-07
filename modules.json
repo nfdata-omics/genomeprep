@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/genomeprep",
-    "homePage": "https://github.com/nf-core/genomeprep",
+    "name": "nfdata-omics/genomeprep",
+    "homePage": "https://github.com/nfdata-omics/genomeprep",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {
