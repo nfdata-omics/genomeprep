@@ -1,11 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/genomeprep
+    nfdata-omics/genomeprep
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/genomeprep
-    Website: https://nf-co.re/genomeprep
-    Slack  : https://nfcore.slack.com/channels/genomeprep
+    Github : https://github.com/nfdata-omics/genomeprep
 ----------------------------------------------------------------------------------------
 */
 
@@ -18,7 +16,6 @@
 include { GENOMEPREP  } from './workflows/genomeprep'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_genomeprep_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_genomeprep_pipeline'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -28,7 +25,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_geno
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow NFCORE_GENOMEPREP {
+workflow NFDATAOMICS_GENOMEPREP {
 
     take:
     fasta // channel: fasta read in from --fasta
@@ -89,7 +86,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_GENOMEPREP (
+    NFDATAOMICS_GENOMEPREP (
         PIPELINE_INITIALISATION.out.fasta,
         PIPELINE_INITIALISATION.out.gtf,
         PIPELINE_INITIALISATION.out.transcripts_fasta,

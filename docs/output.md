@@ -1,4 +1,4 @@
-# nf-core/genomeprep: Output
+# nfdata-omics/genomeprep: Output
 
 ## Introduction
 

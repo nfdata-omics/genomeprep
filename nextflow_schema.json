@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/genomeprep/master/nextflow_schema.json",
-    "title": "nf-core/genomeprep pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/nfdata-omics/genomeprep/master/nextflow_schema.json",
+    "title": "nfdata-omics/genomeprep pipeline parameters",
     "description": "A pipeline to prepare reference genomes and annotations for non-model organisms.",
     "type": "object",
     "$defs": {
