@@ -44,3 +44,4 @@ template:
     - gpu
     - codespaces
   version: 1.0.0dev
+repository_type: pipeline
