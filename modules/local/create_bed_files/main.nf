@@ -2,7 +2,7 @@ process CREATE_BED_FILES {
 
     publishDir "${params.outdir}/bed_files/", mode: 'copy'
 
-    container = 'gitlab.fht.org:5050/nfdata-omics/genes-db:test'
+    container = 'nfdata/genes-db:v1.0.0'
 
     containerOptions = workflow.containerEngine == 'docker' ?
         '--platform=linux/amd64 --entrypoint=""' : ''
