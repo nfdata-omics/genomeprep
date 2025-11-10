@@ -6,6 +6,10 @@ process CREATE_GENOMES_CONFIG {
 
     conda "${moduleDir}/environment.yml"
     container = 'docker.io/nfdata/genome-config:v1.0.0'
+
+    containerOptions = workflow.containerEngine == 'docker' ?
+        '--platform=linux/amd64 --entrypoint=""' : ''
+
     input:
     val genome_version_name
     path current_config_file
