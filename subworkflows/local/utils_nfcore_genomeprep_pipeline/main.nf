@@ -199,36 +199,45 @@ workflow PIPELINE_COMPLETION {
     // Completion email and summary
     //
     workflow.onComplete {
-        if (email || email_on_fail) {
-            completionEmail(
-                summary_params,
-                email,
-                email_on_fail,
-                plaintext_email,
-                outdir,
-                monochrome_logs,
-                []
-            )
-        }
+        try {
+            def publish_outdir
+            try {
+                // if `outdir` is defined this will return it, otherwise will throw MissingPropertyException
+                publish_outdir = outdir ?: params?.outdir
+            } catch(Exception _ignored) {
+                publish_outdir = params?.outdir ?: null
+            }
 
-        completionSummary(monochrome_logs)
-        if (hook_url) {
-            imNotification(summary_params, hook_url)
-        }
+            if (!publish_outdir) {
+                log.warn "onComplete: output directory not set, skipping permission changes"
+                return
+            }
 
-        def outdir = params.outdir
-        def cmd = """
-            find ${outdir} -maxdepth 3 -type f -not -path "${outdir}/pipeline_info/*" -exec chmod 444 {} \\;
-        """
+            def root = new File(publish_outdir)
+            if (!root.exists() || !root.isDirectory()) {
+                log.warn "onComplete: publish_outdir does not exist or is not a directory: ${publish_outdir}"
+                return
+            }
 
-        def proc = ["bash", "-c", cmd].execute()
-        proc.in.eachLine { println "[chmod] $it" }
-        proc.waitFor()
+            root.eachFileRecurse { f ->
+                try {
+                    def rel = root.toPath().relativize(f.toPath()).toString()
+                    if (rel == "") return
+                    def depth = rel.split(/[\\/]/).size()
+                    if (depth > 3) return
+                    if (rel.startsWith("pipeline_info${File.separator}") || rel == 'pipeline_info') return
+                    if (f.isFile()) {
+                        f.setWritable(false, false)
+                        println "[chmod] ${f}"
+                    }
+                } catch(Exception e) {
+                    log.warn "onComplete: failed to change permissions for ${f}: ${e.message}"
+                }
+            }
 
-        if (proc.exitValue() == 0) {
-            println "[onComplete] File permissions changed successfully."
-        } else {
-            println "[onComplete] Failed to change file permissions."
+            println "[onComplete] File permissions processed."
+        } catch(Exception e) {
+            log.error "onComplete handler failed: ${e.message}", e
         }
     }
 
