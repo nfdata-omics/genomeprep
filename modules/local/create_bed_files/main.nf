@@ -2,10 +2,7 @@ process CREATE_BED_FILES {
 
     publishDir "${params.outdir}/bed_files/", mode: 'copy'
 
-    container = 'docker.io/nfdata/genes-db:v1.0.0'
-
-    containerOptions = workflow.containerEngine == 'docker' ?
-        '--platform=linux/amd64 --entrypoint=""' : ''
+    container = 'docker.io/nfdata/genes-db:v1.1.0'
 
     tag "$db"
 
