@@ -7,7 +7,6 @@ testing/
 testing*
 *.pyc
 null/
-*.snap
 *.log
 __pycache__/
 .pytest_cache
