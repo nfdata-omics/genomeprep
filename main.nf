@@ -112,23 +112,6 @@ workflow {
     )
 }
 
-workflow.onComplete {
-    def outdir = params.outdir
-    def cmd = """
-        find ${outdir} -maxdepth 3 -type f -not -path "${outdir}/pipeline_info/*" -exec chmod 444 {} \\;
-    """
-
-    def proc = ["bash", "-c", cmd].execute()
-    proc.in.eachLine { println "[chmod] $it" }
-    proc.waitFor()
-
-    if (proc.exitValue() == 0) {
-        println "[onComplete] File permissions changed successfully."
-    } else {
-        println "[onComplete] Failed to change file permissions."
-    }
-}
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     THE END
