@@ -2,7 +2,7 @@ process CREATE_BED_FILES {
 
     publishDir "${params.outdir}/bed_files/", mode: 'copy'
 
-    container = 'docker.io/nfdata/genes-db:v1.1.0'
+    container 'docker.io/nfdata/genes-db:v1.1.0'
 
     tag "$db"
 

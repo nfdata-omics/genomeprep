@@ -1,5 +1,5 @@
 process CELLRANGERATAC_MKREF {
-    tag "$reference_config"
+    tag "$genome_name"
     label 'process_medium'
 
     container "nf-core/cellranger-atac:2.1.0"
@@ -29,7 +29,7 @@ process CELLRANGERATAC_MKREF {
     def args = task.ext.args ?: ''
     def has_motifs = transcription_factors && transcription_factors.name != "no_motifs"
     def has_contigs = non_nuclear_contigs && non_nuclear_contigs.size() > 0
-    
+
     """
     # Build the configuration JSON in shell to use actual file paths
     cat > reference_config.json << EOF

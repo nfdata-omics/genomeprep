@@ -2,7 +2,7 @@ process CREATE_GENES_DB {
 
     publishDir "${params.outdir}/genes_db", mode: 'copy'
 
-    container = 'docker.io/nfdata/genes-db:v1.1.0'
+    container 'docker.io/nfdata/genes-db:v1.1.0'
 
     tag "$gtf"
 
