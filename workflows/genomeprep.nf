@@ -198,7 +198,7 @@ workflow GENOMEPREP {
     if (!workflow.profile?.contains('test')) {
             CELLRANGER_MKVDJREF(
                 fasta.map { it[1] },
-                ch_gtf_valid.map { it[1] },
+                CELLRANGER_MKGTF.out.gtf,
                 vdj_fasta,
                 genome_version_name
             )
@@ -218,7 +218,7 @@ workflow GENOMEPREP {
     if (!workflow.profile?.contains('test')) {
             SPACERANGER_MKREF(
                 fasta.map { it[1] },
-                ch_gtf_valid.map { it[1] },
+                CELLRANGER_MKGTF.out.gtf,
                 genome_version_name
             )
 
@@ -237,7 +237,7 @@ workflow GENOMEPREP {
     if (!workflow.profile?.contains('test')) {
             CELLRANGERATAC_MKREF(
                 fasta.map { it[1] },
-                ch_gtf_valid.map { it[1] },
+                CELLRANGER_MKGTF.out.gtf,
                 organism,
                 genome_version_name,
                 non_nuclear_contigs,
