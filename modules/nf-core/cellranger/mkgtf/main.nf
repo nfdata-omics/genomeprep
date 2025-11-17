@@ -1,17 +1,15 @@
-process CELLRANGER_MKREF {
-    tag "$fasta"
-    label 'process_high'
+process CELLRANGER_MKGTF {
+    tag "$gtf"
+    label 'process_low'
 
     container "nf-core/cellranger:9.0.1"
 
     input:
-    path fasta
     path gtf
-    val reference_name
 
     output:
-    path "${reference_name}", emit: reference
-    path "versions.yml"     , emit: versions
+    path "*.gtf"         , emit: gtf
+    path "versions.yml"  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -19,21 +17,15 @@ process CELLRANGER_MKREF {
     script:
     // Exit if running this module with -profile conda / -profile mamba
     if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        error "CELLRANGER_MKREF module does not support Conda. Please use Docker / Singularity / Podman instead."
+        error "CELLRANGER_MKGTF module does not support Conda. Please use Docker / Singularity / Podman instead."
     }
     def args = task.ext.args ?: ''
-    // --localcores is passed to the martian runtime and specifies the number of allocated jobs
-    // --nthreads is passed to the STAR index generation.
-    // see also https://github.com/nf-core/scrnaseq/issues/329
+    def prefix = task.ext.prefix ?: "${gtf.baseName}.filtered"
     """
     cellranger \\
-        mkref \\
-        --genome=$reference_name \\
-        --fasta=$fasta \\
-        --genes=$gtf \\
-        --localcores=${task.cpus} \\
-        --localmem=${task.memory.toGiga()} \\
-        --nthreads=${task.cpus} \\
+        mkgtf \\
+        $gtf \\
+        ${prefix}.gtf \\
         $args
 
     cat <<-END_VERSIONS > versions.yml
@@ -45,17 +37,16 @@ process CELLRANGER_MKREF {
     stub:
     // Exit if running this module with -profile conda / -profile mamba
     if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        error "CELLRANGER_MKREF module does not support Conda. Please use Docker / Singularity / Podman instead."
+        error "CELLRANGER_MKGTF module does not support Conda. Please use Docker / Singularity / Podman instead."
     }
     def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${gtf.baseName}.filtered"
     """
-    mkdir $reference_name
-    touch ${reference_name}/empty_file
+    touch ${prefix}.gtf
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         cellranger: \$(echo \$( cellranger --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
     END_VERSIONS
     """
-
 }

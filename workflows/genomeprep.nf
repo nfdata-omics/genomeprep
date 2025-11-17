@@ -5,6 +5,7 @@
 */
 include { HANDLE_README} from '../modules/local/handle_readme/main.nf'
 include { COUNT_CHROMOSOMES_SIZES } from '../modules/local/count_chromosomes_sizes/main.nf'
+include { CELLRANGER_MKGTF } from '../modules/nf-core/cellranger/mkgtf/main.nf'
 include { CELLRANGER_MKREF } from '../modules/nf-core/cellranger/mkref/main'
 include { CELLRANGERATAC_MKREF } from '../modules/nf-core/cellrangeratac/mkref/main'
 include { CELLRANGER_MKVDJREF } from '../modules/nf-core/cellranger/mkvdjref/main'
@@ -76,6 +77,7 @@ workflow GENOMEPREP {
         // Run samtools indexing
         //
         SAMTOOLS_FAIDX(fasta,
+                       tuple("", file("no_fai", checkIfExists: false)),
                        Channel.from(false))
 
         //
@@ -149,65 +151,107 @@ workflow GENOMEPREP {
             file("no_bed", checkIfExists: false)
         }
 
+    // Default placeholders for optional references when running with the `test` profile
+    // These ensure downstream code can always reference the channels even if
+    // the mkref processes are skipped in the test profile.
+    ch_cellranger = Channel.from(file("no_cellranger", checkIfExists: false))
+    ch_vdj = Channel.from(file("no_cellranger_vdj", checkIfExists: false))
+    ch_spaceranger = Channel.from(file("no_spaceranger", checkIfExists: false))
+    ch_atac = Channel.from(file("no_atac", checkIfExists: false))
+
+    // Default empty version channels for optional processes (will be overridden
+    // if the corresponding mkref process is invoked)
+    ch_mkref_versions = Channel.empty()
+    ch_mkvdjref_versions = Channel.empty()
+    ch_spaceranger_versions = Channel.empty()
+    ch_atac_mkref_versions = Channel.empty()
+
+        //
+        // Filter GTF using Cell Ranger mkgtf
+        //
+        CELLRANGER_MKGTF(
+            ch_gtf_valid.map { it[1] }
+        )
+
         //
         // Create Cell Ranger reference
         //
-        CELLRANGER_MKREF(
-            fasta.map { it[1] },
-            ch_gtf_valid.map { it[1] },
-            genome_version_name
-        )
+    if (!workflow.profile?.contains('test')) {
+            CELLRANGER_MKREF(
+                fasta.map { it[1] },
+                CELLRANGER_MKGTF.out.gtf,
+                genome_version_name
+            )
 
-        // Channel to handle CELLRANGER_MKREF output
-        ch_cellranger = CELLRANGER_MKREF.out.reference.ifEmpty {
-            file("no_cellranger", checkIfExists: false)
+            // Channel to handle CELLRANGER_MKREF output
+            ch_cellranger = CELLRANGER_MKREF.out.reference.ifEmpty {
+                file("no_cellranger", checkIfExists: false)
+            }
+
+            // versions channel for CELLRANGER_MKREF
+            ch_mkref_versions = CELLRANGER_MKREF.out.versions
         }
 
-        //
-        // Create Cell Ranger VDJ reference
-        //
-        CELLRANGER_MKVDJREF(
-            fasta.map { it[1] },
-            ch_gtf_valid.map { it[1] },
-            vdj_fasta,
-            genome_version_name
-        )
+    //
+    // Create Cell Ranger VDJ reference
+    //
+    if (!workflow.profile?.contains('test')) {
+            CELLRANGER_MKVDJREF(
+                fasta.map { it[1] },
+                ch_gtf_valid.map { it[1] },
+                vdj_fasta,
+                genome_version_name
+            )
 
-        // Channel to handle CELLRANGER_MKVDJREF output
-        ch_vdj = CELLRANGER_MKVDJREF.out.reference.ifEmpty {
-            file("no_cellranger_vdj", checkIfExists: false)
+            // Channel to handle CELLRANGER_MKVDJREF output
+            ch_vdj = CELLRANGER_MKVDJREF.out.reference.ifEmpty {
+                file("no_cellranger_vdj", checkIfExists: false)
+            }
+
+            // versions channel for CELLRANGER_MKVDJREF
+            ch_mkvdjref_versions = CELLRANGER_MKVDJREF.out.versions
         }
 
         //
         // Create Spacer Ranger reference
         //
-        SPACERANGER_MKREF(
-            fasta.map { it[1] },
-            ch_gtf_valid.map { it[1] },
-            genome_version_name
-        )
+    if (!workflow.profile?.contains('test')) {
+            SPACERANGER_MKREF(
+                fasta.map { it[1] },
+                ch_gtf_valid.map { it[1] },
+                genome_version_name
+            )
 
-        // Channel to handle SPACERANGER_MKREF output
-        ch_spaceranger = SPACERANGER_MKREF.out.reference.ifEmpty {
-            file("no_spaceranger", checkIfExists: false)
+            // Channel to handle SPACERANGER_MKREF output
+            ch_spaceranger = SPACERANGER_MKREF.out.reference.ifEmpty {
+                file("no_spaceranger", checkIfExists: false)
+            }
+
+            // versions channel for SPACERANGER_MKREF
+            ch_spaceranger_versions = SPACERANGER_MKREF.out.versions
         }
 
         //
         // Create Cell Ranger ATAC reference
         //
-        CELLRANGERATAC_MKREF(
-            fasta.map { it[1] },
-            ch_gtf_valid.map { it[1] },
-            organism,
-            genome_version_name,
-            non_nuclear_contigs,
-            transcription_factors,
-            genome_version_name
-        )
+    if (!workflow.profile?.contains('test')) {
+            CELLRANGERATAC_MKREF(
+                fasta.map { it[1] },
+                ch_gtf_valid.map { it[1] },
+                organism,
+                genome_version_name,
+                non_nuclear_contigs,
+                transcription_factors,
+                genome_version_name
+            )
 
-        // Channel to handle CELLRANGERATAC_MKREF output
-        ch_atac = CELLRANGERATAC_MKREF.out.reference.ifEmpty {
-            file("no_atac", checkIfExists: false)
+            // Channel to handle CELLRANGERATAC_MKREF output
+            ch_atac = CELLRANGERATAC_MKREF.out.reference.ifEmpty {
+                file("no_atac", checkIfExists: false)
+            }
+
+            // versions channel for CELLRANGERATAC_MKREF
+            ch_atac_mkref_versions = CELLRANGERATAC_MKREF.out.versions
         }
 
         // Create genomes.config file
@@ -273,19 +317,19 @@ workflow GENOMEPREP {
                     .ifEmpty([])
                     .filter { it != [] }
                     .map { file -> tuple([id: file.baseName], file) },
-                CELLRANGER_MKREF.out.reference
+                ch_cellranger
                     .ifEmpty([])
                     .filter { it != [] }
                     .map { file -> tuple([id: file.baseName], file) },
-                CELLRANGERATAC_MKREF.out.reference
+                ch_atac
                     .ifEmpty([])
                     .filter { it != [] }
                     .map { file -> tuple([id: file.baseName], file) },
-                CELLRANGER_MKVDJREF.out.reference
+                ch_vdj
                     .ifEmpty([])
                     .filter { it != [] }
                     .map { file -> tuple([id: file.baseName], file) },
-                SPACERANGER_MKREF.out.reference
+                ch_spaceranger
                     .ifEmpty([])
                     .filter { it != [] }
                     .map { file -> tuple([id: file.baseName], file) },
@@ -308,10 +352,12 @@ workflow GENOMEPREP {
         ch_salmon_versions = SALMON_INDEX.out.versions
         ch_bed_versions = CREATE_BED_FILES.out.versions
         ch_db_versions = CREATE_GENES_DB.out.versions
-        ch_mkref_versions = CELLRANGER_MKREF.out.versions
-        ch_mkvdjref_versions = CELLRANGER_MKVDJREF.out.versions
-        ch_spaceranger_versions = SPACERANGER_MKREF.out.versions
-        ch_atac_mkref_versions = CELLRANGERATAC_MKREF.out.versions
+        // ch_*_versions are set to defaults above; they will be overridden
+        // inside the corresponding if-blocks when the mkref processes run.
+        ch_mkref_versions = ch_mkref_versions
+        ch_mkvdjref_versions = ch_mkvdjref_versions
+        ch_spaceranger_versions = ch_spaceranger_versions
+        ch_atac_mkref_versions = ch_atac_mkref_versions
         ch_config_versions = CREATE_GENOMES_CONFIG.out.versions
         ch_md5sum_versions = MD5SUM.out.versions
 

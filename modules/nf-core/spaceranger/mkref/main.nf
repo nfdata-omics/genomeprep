@@ -10,7 +10,7 @@ process SPACERANGER_MKREF {
     val reference_name
 
     output:
-    path "${reference_name}_spaceranger", emit: reference
+    path "${reference_name}", emit: reference
     path "versions.yml"     , emit: versions
 
     when:
@@ -26,8 +26,6 @@ process SPACERANGER_MKREF {
     // --nthreads is passed to the STAR index generation.
     // see also https://github.com/nf-core/scrnaseq/issues/329
     """
-    mkdir -p "${reference_name}_spaceranger"
-
     spaceranger \\
         mkref \\
         --genome=$reference_name \\
@@ -37,8 +35,6 @@ process SPACERANGER_MKREF {
         --localmem=${task.memory.toGiga()} \\
         --nthreads=${task.cpus} \\
         $args
-
-    mv $reference_name/* "${reference_name}_spaceranger/"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

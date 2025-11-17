@@ -1,0 +1,23 @@
+Changes in component 'nf-core/cellranger/mkvdjref'
+'modules/nf-core/cellranger/mkvdjref/meta.yml' is unchanged
+Changes in 'cellranger/mkvdjref/main.nf':
+--- modules/nf-core/cellranger/mkvdjref/main.nf
++++ modules/nf-core/cellranger/mkvdjref/main.nf
+@@ -23,9 +23,9 @@
+         error "CELLRANGER_MKVDJREF module does not support Conda. Please use Docker / Singularity / Podman instead."
+     }
+     def args        = task.ext.args ?: ''
+-    def gtf_in      = gtf           ? "--genes ${gtf}"      : ""
+-    def fasta_in    = fasta         ? "--fasta ${fasta}"    : ""
+-    def seqs_in     = seqs          ? "--seqs ${seqs}"      : ""
++    def gtf_in      = gtf                                   ? "--genes ${gtf}"      : ""
++    def fasta_in    = fasta                                 ? "--fasta ${fasta}"    : ""
++    def seqs_in     = (seqs.name != "no_vdj_fasta")         ? "--seqs ${seqs}"      : ""
+ 
+     """
+     cellranger \\
+
+'modules/nf-core/cellranger/mkvdjref/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/cellranger/mkvdjref/tests/nextflow.config' is unchanged
+'modules/nf-core/cellranger/mkvdjref/tests/main.nf.test' is unchanged
+************************************************************

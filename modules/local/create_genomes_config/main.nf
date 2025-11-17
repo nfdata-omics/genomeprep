@@ -4,8 +4,9 @@ process CREATE_GENOMES_CONFIG {
 
     tag "$genome_version_name"
 
-    conda "${moduleDir}/environment.yml" 
-    container = 'gitlab.fht.org:5050/nfdata-omics/genome-config:test'
+    conda "${moduleDir}/environment.yml"
+    container 'docker.io/nfdata/genome-config:v1.1.0'
+
     input:
     val genome_version_name
     path current_config_file

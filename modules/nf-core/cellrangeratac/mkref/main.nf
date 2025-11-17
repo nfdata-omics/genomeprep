@@ -1,6 +1,6 @@
 process CELLRANGERATAC_MKREF {
-    tag "$fasta"
-    label 'process_high'
+    tag "$genome_name"
+    label 'process_medium'
 
     container "nf-core/cellranger-atac:2.1.0"
 
@@ -14,7 +14,7 @@ process CELLRANGERATAC_MKREF {
     val reference_name
 
     output:
-    path "${reference_name}_atac", emit: reference
+    path "${reference_name}", emit: reference
     path "versions.yml"     , emit: versions
 
     when:
@@ -29,7 +29,7 @@ process CELLRANGERATAC_MKREF {
     def args = task.ext.args ?: ''
     def has_motifs = transcription_factors && transcription_factors.name != "no_motifs"
     def has_contigs = non_nuclear_contigs && non_nuclear_contigs.size() > 0
-    
+
     """
     # Build the configuration JSON in shell to use actual file paths
     cat > reference_config.json << EOF
@@ -41,19 +41,15 @@ process CELLRANGERATAC_MKREF {
 }
 EOF
 
-    mkdir -p "${reference_name}_atac/"
-
     cellranger-atac \\
         mkref \\
         --config=reference_config.json \\
         $args
 
-    mv ${reference_name}/* "${reference_name}_atac/"
-
-cat <<-END_VERSIONS > versions.yml
-"${task.process}":
-    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
-END_VERSIONS
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
+    END_VERSIONS
     """
 
     stub:
@@ -73,9 +69,9 @@ END_VERSIONS
     mkdir -p "${reference_name}/regions/"
     touch ${reference_name}/regions/{motifs.pfm,transcripts.bed,tss.bed}
 
-cat <<-END_VERSIONS > versions.yml
-"${task.process}":
-    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
-END_VERSIONS
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
+    END_VERSIONS
     """
 }

@@ -1,2 +1,11 @@
 .DS_Store
 pipeline_info/*.{html,json,txt,yml}
+md5sum/*.md5
+genomes_config/genomes_config/genomes.config
+salmon/salmon/ctable.bin
+salmon/salmon/pos.bin
+salmon/salmon/pre_indexing.log
+salmon/salmon/ref_indexing.log
+salmon/salmon/seq.bin
+star/star/Log.out
+genes_db/genes.db

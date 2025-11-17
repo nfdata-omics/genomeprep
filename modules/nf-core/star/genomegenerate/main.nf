@@ -22,7 +22,7 @@ process STAR_GENOMEGENERATE {
     def args        = task.ext.args ?: ''
     def args_list   = args.tokenize()
     def memory      = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
-    def include_gtf = (gtf && gtf.name != 'no_gtf') ? "--sjdbGTFfile $gtf" : ''
+    def include_gtf = gtf ? "--sjdbGTFfile $gtf" : ''
     if (args_list.contains('--genomeSAindexNbases')) {
         """
         mkdir star

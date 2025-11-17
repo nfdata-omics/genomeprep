@@ -1,18 +1,17 @@
 process CELLRANGER_MKVDJREF {
-
     tag "$fasta"
     label 'process_high'
 
     container "nf-core/cellranger:9.0.1"
 
     input:
-    path fasta          
-    path gtf           
-    path seqs
+    path fasta          // optional
+    path gtf            // optional
+    path seqs           // optional
     val reference_name
 
     output:
-    path "${reference_name}_vdj", emit: reference
+    path "${reference_name}", emit: reference
     path "versions.yml"     , emit: versions
 
     when:
@@ -29,8 +28,6 @@ process CELLRANGER_MKVDJREF {
     def seqs_in     = (seqs.name != "no_vdj_fasta")         ? "--seqs ${seqs}"      : ""
 
     """
-    mkdir -p "${reference_name}_vdj"
-
     cellranger \\
         mkvdjref \\
         --genome=$reference_name \\
@@ -40,8 +37,6 @@ process CELLRANGER_MKVDJREF {
         --localcores=${task.cpus} \\
         --localmem=${task.memory.toGiga()} \\
         $args
-
-    mv $reference_name/* "${reference_name}_vdj/"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
