@@ -217,6 +217,7 @@
                 "chr21_subset.dict:md5,f53cf390fc1ec9f5c54d0ec306cf570d",
                 "chr21.gtf:md5,c05cbc537449124ae096174af00f3dc5",
                 "versions.yml:md5,cf8544d8590f4318f3617c1ea960e8a5",
+                "genomes.config:md5,f48ee6c329e0a3235f99caeaf5c2f633",
                 "versions.yml:md5,0d2798786f6e12197d3066c5c1c984b1",
                 "README.md:md5,c29393520a46729d5f6f94ba0151c6a3",
                 "genome.transcripts.fa:md5,bb06848dc5604c73fa4b2b1d05436668",
@@ -260,6 +261,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.4"
         },
-        "timestamp": "2025-11-13T16:07:56.054187"
+        "timestamp": "2025-11-19T10:22:51.45579"
     }
 }
