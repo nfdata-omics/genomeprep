@@ -23,7 +23,7 @@ Changes in 'cellrangeratac/mkref/main.nf':
      val reference_name
  
      output:
-@@ -23,11 +25,25 @@
+@@ -23,17 +25,31 @@
      if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
          exit 1, "CELLRANGERATAC_MKREF module does not support Conda. Please use Docker / Singularity / Podman instead."
      }
@@ -49,7 +49,31 @@ Changes in 'cellrangeratac/mkref/main.nf':
 +        --config=reference_config.json \\
          $args
  
-     cat <<-END_VERSIONS > versions.yml
+-    cat <<-END_VERSIONS > versions.yml
+-    "${task.process}":
+-        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
+-    END_VERSIONS
++cat <<-END_VERSIONS > versions.yml
++"${task.process}":
++    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
++END_VERSIONS
+     """
+ 
+     stub:
+@@ -53,9 +69,9 @@
+     mkdir -p "${reference_name}/regions/"
+     touch ${reference_name}/regions/{motifs.pfm,transcripts.bed,tss.bed}
+ 
+-    cat <<-END_VERSIONS > versions.yml
+-    "${task.process}":
+-        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
+-    END_VERSIONS
++cat <<-END_VERSIONS > versions.yml
++"${task.process}":
++    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
++END_VERSIONS
+     """
+ }
 
 'modules/nf-core/cellrangeratac/mkref/tests/main.nf.test' is unchanged
 'modules/nf-core/cellrangeratac/mkref/tests/main.nf.test.snap' was removed

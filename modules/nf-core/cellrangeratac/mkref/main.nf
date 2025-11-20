@@ -46,10 +46,10 @@ EOF
         --config=reference_config.json \\
         $args
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
-    END_VERSIONS
+cat <<-END_VERSIONS > versions.yml
+"${task.process}":
+    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
+END_VERSIONS
     """
 
     stub:
@@ -69,9 +69,9 @@ EOF
     mkdir -p "${reference_name}/regions/"
     touch ${reference_name}/regions/{motifs.pfm,transcripts.bed,tss.bed}
 
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
-    END_VERSIONS
+cat <<-END_VERSIONS > versions.yml
+"${task.process}":
+    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
+END_VERSIONS
     """
 }
