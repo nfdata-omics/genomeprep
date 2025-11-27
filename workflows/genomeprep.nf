@@ -51,6 +51,8 @@ workflow GENOMEPREP {
 
     main:
 
+        ch_versions = channel.empty()
+
         //
         // Create README for the Genome Version based on FASTA and GTF READMEs
         HANDLE_README(fasta_readme,
@@ -364,7 +366,6 @@ workflow GENOMEPREP {
         //
         // Add software versions to `ch_versions`
         //
-        ch_versions = Channel.empty()
 
         ch_versions = ch_versions
             .mix(
@@ -387,16 +388,31 @@ workflow GENOMEPREP {
                 ch_md5sum_versions
             ).flatten()
 
-        //
-        // Collate and save software versions
-        //
-        softwareVersionsToYAML(ch_versions)
-            .collectFile(
-                storeDir: "${params.outdir}/pipeline_info",
-                name: 'genomeprep_software_'  + 'versions.yml',
-                sort: true,
-                newLine: true
-            ).set { ch_collated_versions }
+    def topic_versions = Channel.topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+        }
+        .groupTuple(by:0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name:  'genomeprep_software_'  + 'versions.yml',
+            sort: true,
+            newLine: true
+        ).set { ch_collated_versions }
 
     emit:
         versions       = ch_versions
