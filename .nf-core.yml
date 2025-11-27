@@ -36,7 +36,6 @@ lint:
     - manifest.name
     - manifest.homePage
 nf_core_version: 3.5.1
-repository_type: pipeline
 template:
   author: Leandro Tiburske
   description: A pipeline to prepare reference genomes and annotations for non-model organisms.
