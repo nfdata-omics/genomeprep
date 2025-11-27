@@ -1,11 +1,9 @@
 process CREATE_GENOMES_CONFIG {
 
-    publishDir "${params.outdir}/genomes_config", mode: 'copy'
-
     tag "$genome_version_name"
 
     conda "${moduleDir}/environment.yml"
-    container 'docker.io/nfdata/genome-config:v1.3.0'
+    container 'docker.io/nfdata/genome-config:v1.8.0'
 
     input:
     val genome_version_name
@@ -31,6 +29,8 @@ process CREATE_GENOMES_CONFIG {
 
     output:
     path "genomes_config", emit: config
+    path "fasta", emit: fasta
+    path "genes", emit: genes
     path "versions.yml", emit: versions
 
     when:
@@ -82,12 +82,12 @@ process CREATE_GENOMES_CONFIG {
     mkdir -p genomes_config
 
     if [ "$gtf" != "no_gtf" ]; then
-        mkdir -p $outdir_abs/genes
-        cp $gtf $outdir_abs/genes/
+        mkdir -p genes
+        cp $gtf genes/
     fi
 
-    mkdir -p $outdir_abs/fasta
-    cp $fasta $outdir_abs/fasta/
+    mkdir -p fasta
+    cp $fasta fasta/
 
     echo "Config file: $current_config_file_args"
 
@@ -103,7 +103,6 @@ process CREATE_GENOMES_CONFIG {
         --bismark $bismark_abs \
         --chrom_sizes $chrom_sizes_abs \
         --readme $readme_abs \
-        --base_dir $outdir_abs \
         $cellranger_args \
         $atac_args \
         $vdj_args \

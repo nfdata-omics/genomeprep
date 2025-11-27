@@ -3,7 +3,16 @@ Changes in component 'nf-core/cellranger/mkvdjref'
 Changes in 'cellranger/mkvdjref/main.nf':
 --- modules/nf-core/cellranger/mkvdjref/main.nf
 +++ modules/nf-core/cellranger/mkvdjref/main.nf
-@@ -23,9 +23,9 @@
+@@ -11,7 +11,7 @@
+     val reference_name
+ 
+     output:
+-    path "${reference_name}", emit: reference
++    path "${reference_name}_vdj", emit: reference
+     path "versions.yml"     , emit: versions
+ 
+     when:
+@@ -23,11 +23,13 @@
          error "CELLRANGER_MKVDJREF module does not support Conda. Please use Docker / Singularity / Podman instead."
      }
      def args        = task.ext.args ?: ''
@@ -15,9 +24,22 @@ Changes in 'cellranger/mkvdjref/main.nf':
 +    def seqs_in     = (seqs.name != "no_vdj_fasta")         ? "--seqs ${seqs}"      : ""
  
      """
++    mkdir -p "${reference_name}_vdj"
++
      cellranger \\
+         mkvdjref \\
+         --genome=$reference_name \\
+@@ -37,6 +39,8 @@
+         --localcores=${task.cpus} \\
+         --localmem=${task.memory.toGiga()} \\
+         $args
++
++    mv "${reference_name}" "${reference_name}_vdj"
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
 
-'modules/nf-core/cellranger/mkvdjref/tests/main.nf.test.snap' is unchanged
 'modules/nf-core/cellranger/mkvdjref/tests/nextflow.config' is unchanged
 'modules/nf-core/cellranger/mkvdjref/tests/main.nf.test' is unchanged
+'modules/nf-core/cellranger/mkvdjref/tests/main.nf.test.snap' was removed
 ************************************************************
