@@ -23,11 +23,15 @@ lint:
     - docs/README.md
     - .github/CONTRIBUTING.md
     - assets/sendmail_template.txt
+    - modules/nf-core/cellrangeratac/mkref/meta.yml
+    - modules/nf-core/cellrangeratac/mkref/main.nf
+    - assets/nf-core-genomeprep_logo_light.png
   multiqc_config: false
   nextflow_config:
     - manifest.name
     - manifest.homePage
-nf_core_version: 3.4.1
+nf_core_version: 3.5.1
+repository_type: pipeline
 template:
   author: Leandro Tiburske
   description: A pipeline to prepare reference genomes and annotations for non-model
