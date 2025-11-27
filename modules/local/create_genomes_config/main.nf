@@ -6,6 +6,7 @@ process CREATE_GENOMES_CONFIG {
     container 'docker.io/nfdata/genome-config:v1.8.0'
 
     input:
+    val base_dir
     val genome_version_name
     path current_config_file
     path fasta
@@ -65,6 +66,7 @@ process CREATE_GENOMES_CONFIG {
 
     def config_file = "genomes_config/genomes.config"
 
+    def base_dir_path = (base_dir != "no_provided_base_dir") ? base_dir : "$outdir_abs"
     def gtf_args = (gtf.name != 'no_gtf') ? "--gtf $gtf_abs" : ""
     def cellranger_args = (cellranger.name != 'no_cellranger') ? "--cellranger $cellranger_abs" : ""
     def atac_args = (atac.name != 'no_atac') ? "--cellranger_atac $atac_abs" : ""
@@ -92,6 +94,7 @@ process CREATE_GENOMES_CONFIG {
     echo "Config file: $current_config_file_args"
 
     python3.11 $script_path \
+        --base_dir $base_dir_path \
         --genome_version_name $genome_version_name \
         $current_config_file_args \
         --fasta $fasta_abs \

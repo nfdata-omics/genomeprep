@@ -37,6 +37,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_geno
 workflow GENOMEPREP {
 
     take:
+        base_dir // string: base directory for the genomes config
         fasta // channel: fasta read in from --fasta
         gtf   // channel: gtf read in from --gtf
         transcripts_fasta // channel: transcripts fasta read in from --transcripts_fasta
@@ -256,6 +257,7 @@ workflow GENOMEPREP {
 
         // Create genomes.config file
         CREATE_GENOMES_CONFIG(
+            base_dir,
             genome_version_name,
             current_config_file,
             fasta.collect { it[1] },

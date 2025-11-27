@@ -43,6 +43,10 @@
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "base_dir": {
+                    "type": "string",
+                    "fa_icon": "far fa-file-code"
+                },
                 "current_config_file": {
                     "type": "string",
                     "fa_icon": "far fa-file-code"
