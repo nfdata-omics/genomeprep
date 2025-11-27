@@ -35,7 +35,7 @@ lint:
   nextflow_config:
     - manifest.name
     - manifest.homePage
-nf_core_version: 3.4.1
+nf_core_version: 3.5.1
 template:
   author: Leandro Tiburske
   description: A pipeline to prepare reference genomes and annotations for non-model organisms.
