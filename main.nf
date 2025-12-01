@@ -28,6 +28,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_geno
 workflow NFDATAOMICS_GENOMEPREP {
 
     take:
+    base_dir // string: base directory for the genomes config
     fasta // channel: fasta read in from --fasta
     gtf   // channel: gtf read in from --gtf
     transcripts_fasta // channel: transcripts fasta read in from --transcripts_fasta
@@ -46,7 +47,7 @@ workflow NFDATAOMICS_GENOMEPREP {
     // WORKFLOW: Run pipeline
     //
     GENOMEPREP (
-        fasta, gtf, transcripts_fasta, genome_version_name, organism, current_config_file, fasta_readme, gtf_readme, vdj_fasta, non_nuclear_contigs, transcription_factors
+        base_dir, fasta, gtf, transcripts_fasta, genome_version_name, organism, current_config_file, fasta_readme, gtf_readme, vdj_fasta, non_nuclear_contigs, transcription_factors
     )
 }
 /*
@@ -67,6 +68,7 @@ workflow {
         params.monochrome_logs,
         args,
         params.outdir,
+        params.base_dir,
         params.fasta,
         params.gtf,
         params.transcripts_fasta,
@@ -87,6 +89,7 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFDATAOMICS_GENOMEPREP (
+        PIPELINE_INITIALISATION.out.base_dir,
         PIPELINE_INITIALISATION.out.fasta,
         PIPELINE_INITIALISATION.out.gtf,
         PIPELINE_INITIALISATION.out.transcripts_fasta,

@@ -10,7 +10,7 @@ Changes in 'cellrangeratac/mkref/main.nf':
      label 'process_medium'
  
      container "nf-core/cellranger-atac:2.1.0"
-@@ -7,8 +7,10 @@
+@@ -7,12 +7,14 @@
      input:
      path fasta
      path gtf
@@ -23,7 +23,12 @@ Changes in 'cellrangeratac/mkref/main.nf':
      val reference_name
  
      output:
-@@ -23,17 +25,31 @@
+-    path "${reference_name}", emit: reference
++    path "${reference_name}_atac", emit: reference
+     path "versions.yml"     , emit: versions
+ 
+     when:
+@@ -23,17 +25,35 @@
      if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
          exit 1, "CELLRANGERATAC_MKREF module does not support Conda. Please use Docker / Singularity / Podman instead."
      }
@@ -43,6 +48,8 @@ Changes in 'cellrangeratac/mkref/main.nf':
 +}
 +EOF
 +
++    mkdir -p "${reference_name}_atac"
++
      cellranger-atac \\
          mkref \\
 -        --config=$reference_config \\
@@ -53,6 +60,8 @@ Changes in 'cellrangeratac/mkref/main.nf':
 -    "${task.process}":
 -        cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
 -    END_VERSIONS
++    mv "${reference_name}" "${reference_name}_atac"
++
 +cat <<-END_VERSIONS > versions.yml
 +"${task.process}":
 +    cellrangeratac: \$(echo \$( cellranger-atac --version 2>&1) | sed 's/^.*[^0-9]\\([0-9]*\\.[0-9]*\\.[0-9]*\\).*\$/\\1/' )
@@ -60,7 +69,7 @@ Changes in 'cellrangeratac/mkref/main.nf':
      """
  
      stub:
-@@ -53,9 +69,9 @@
+@@ -53,9 +73,9 @@
      mkdir -p "${reference_name}/regions/"
      touch ${reference_name}/regions/{motifs.pfm,transcripts.bed,tss.bed}
  

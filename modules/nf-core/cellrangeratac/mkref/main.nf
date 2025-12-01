@@ -14,7 +14,7 @@ process CELLRANGERATAC_MKREF {
     val reference_name
 
     output:
-    path "${reference_name}", emit: reference
+    path "${reference_name}_atac", emit: reference
     path "versions.yml"     , emit: versions
 
     when:
@@ -41,10 +41,14 @@ process CELLRANGERATAC_MKREF {
 }
 EOF
 
+    mkdir -p "${reference_name}_atac"
+
     cellranger-atac \\
         mkref \\
         --config=reference_config.json \\
         $args
+
+    mv "${reference_name}" "${reference_name}_atac"
 
 cat <<-END_VERSIONS > versions.yml
 "${task.process}":

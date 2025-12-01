@@ -32,6 +32,7 @@ workflow PIPELINE_INITIALISATION {
     monochrome_logs   // boolean: Do not use coloured log outputs
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
+    base_dir          //  string: The base directory for the config
     fasta             //  string: Path to input samplesheet
     gtf              //  string: Path to GTF file
     transcripts_fasta //  string: Path to transcripts FASTA file
@@ -85,6 +86,12 @@ workflow PIPELINE_INITIALISATION {
         nextflow_cli_args
     )
 
+    //
+    // Create channel from base directory provided through params.base_dir
+    //
+    ch_base_dir = base_dir ?
+                Channel.value(base_dir) :
+                Channel.value("no_provided_base_dir")
     //
     // Create channel from fasta file provided through params.fasta
     //
@@ -162,6 +169,7 @@ workflow PIPELINE_INITIALISATION {
         Channel.from(file('no_motifs', checkIfExists: false))
 
     emit:
+    base_dir = ch_base_dir
     fasta = ch_fasta
     gtf = ch_gtf
     transcripts_fasta = ch_transcripts_fasta

@@ -8,3 +8,4 @@ salmon/salmon/ref_indexing.log
 salmon/salmon/seq.bin
 star/star/Log.out
 genes_db/genes.db
+genomes_config/genomes.config
