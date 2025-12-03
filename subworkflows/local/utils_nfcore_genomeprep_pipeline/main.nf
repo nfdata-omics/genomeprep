@@ -37,6 +37,8 @@ workflow PIPELINE_INITIALISATION {
     gtf              //  string: Path to GTF file
     transcripts_fasta //  string: Path to transcripts FASTA file
     genome_version_name // string: Name of the genome version
+    source           //  string: Source of the genome (e.g., Ensembl, UCSC, NCBI)
+    taxid        //  string: NCBI Taxonomy ID of the organism
     organism          //  string: Name of the organism
     current_config_file //  string: Path to the current config file
     fasta_readme      //  string: Path to FASTA readme file
@@ -123,6 +125,16 @@ workflow PIPELINE_INITIALISATION {
     ch_genome_version_name = Channel.value(genome_version_name)
 
     //
+    // Create channel from source provided through params.source
+    //
+    ch_source = Channel.value(source)
+
+    //
+    // Create channel from taxid provided through params.taxid
+    //
+    ch_taxid = Channel.value(taxid)
+
+    //
     // Create channel from organism name provided through params.organism
     //
     ch_organism = Channel.value(organism)
@@ -174,6 +186,8 @@ workflow PIPELINE_INITIALISATION {
     gtf = ch_gtf
     transcripts_fasta = ch_transcripts_fasta
     genome_version_name = ch_genome_version_name
+    source = ch_source
+    taxid = ch_taxid
     organism = ch_organism
     current_config_file = ch_current_config_file
     fasta_readme = ch_fasta_readme

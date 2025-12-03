@@ -42,6 +42,8 @@ workflow GENOMEPREP {
         gtf   // channel: gtf read in from --gtf
         transcripts_fasta // channel: transcripts fasta read in from --transcripts_fasta
         genome_version_name // string: genome version name read in from --genome_version_name
+        source // string: source of the genome read in from --source
+        taxid // string: taxonomy ID read in from --taxid
         organism // string: organism name read in from --organism
         current_config_file // string: path to the current config file
         fasta_readme // channel: fasta readme read in from --fasta_readme
@@ -262,6 +264,9 @@ workflow GENOMEPREP {
             base_dir,
             genome_version_name,
             current_config_file,
+            source,
+            taxid,
+            organism,
             fasta.collect { it[1] },
             BOWTIE2_BUILD.out.index.collect { it[1] },
             BWA_INDEX.out.index.collect { it[1] },

@@ -33,6 +33,8 @@ workflow NFDATAOMICS_GENOMEPREP {
     gtf   // channel: gtf read in from --gtf
     transcripts_fasta // channel: transcripts fasta read in from --transcripts_fasta
     genome_version_name // string: genome version name read in from --genome_version_name
+    source // string: source of the genome read in from --source
+    taxid // string: taxonomy ID read in from --taxid
     organism // string: organism name read in from --organism
     current_config_file
     fasta_readme // channel: fasta readme read in from --fasta_readme
@@ -47,7 +49,7 @@ workflow NFDATAOMICS_GENOMEPREP {
     // WORKFLOW: Run pipeline
     //
     GENOMEPREP (
-        base_dir, fasta, gtf, transcripts_fasta, genome_version_name, organism, current_config_file, fasta_readme, gtf_readme, vdj_fasta, non_nuclear_contigs, transcription_factors
+        base_dir, fasta, gtf, transcripts_fasta, genome_version_name, source, taxid, organism, current_config_file, fasta_readme, gtf_readme, vdj_fasta, non_nuclear_contigs, transcription_factors
     )
 }
 /*
@@ -73,6 +75,8 @@ workflow {
         params.gtf,
         params.transcripts_fasta,
         params.genome_version_name,
+        params.source,
+        params.taxid,
         params.organism,
         params.current_config_file,
         params.fasta_readme,
@@ -94,6 +98,8 @@ workflow {
         PIPELINE_INITIALISATION.out.gtf,
         PIPELINE_INITIALISATION.out.transcripts_fasta,
         PIPELINE_INITIALISATION.out.genome_version_name,
+        PIPELINE_INITIALISATION.out.source,
+        PIPELINE_INITIALISATION.out.taxid,
         PIPELINE_INITIALISATION.out.organism,
         PIPELINE_INITIALISATION.out.current_config_file,
         PIPELINE_INITIALISATION.out.fasta_readme,
