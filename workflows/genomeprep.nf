@@ -156,20 +156,20 @@ workflow GENOMEPREP {
             file("no_bed", checkIfExists: false)
         }
 
-    // Default placeholders for optional references when running with the `test` profile
-    // These ensure downstream code can always reference the channels even if
-    // the mkref processes are skipped in the test profile.
-    ch_cellranger = Channel.from(file("no_cellranger", checkIfExists: false))
-    ch_vdj = Channel.from(file("no_cellranger_vdj", checkIfExists: false))
-    ch_spaceranger = Channel.from(file("no_spaceranger", checkIfExists: false))
-    ch_atac = Channel.from(file("no_atac", checkIfExists: false))
+        // Default placeholders for optional references when running with the `test` profile
+        // These ensure downstream code can always reference the channels even if
+        // the mkref processes are skipped in the test profile.
+        ch_cellranger = Channel.from(file("no_cellranger", checkIfExists: false))
+        ch_vdj = Channel.from(file("no_cellranger_vdj", checkIfExists: false))
+        ch_spaceranger = Channel.from(file("no_spaceranger", checkIfExists: false))
+        ch_atac = Channel.from(file("no_atac", checkIfExists: false))
 
-    // Default empty version channels for optional processes (will be overridden
-    // if the corresponding mkref process is invoked)
-    ch_mkref_versions = Channel.empty()
-    ch_mkvdjref_versions = Channel.empty()
-    ch_spaceranger_versions = Channel.empty()
-    ch_atac_mkref_versions = Channel.empty()
+        // Default empty version channels for optional processes (will be overridden
+        // if the corresponding mkref process is invoked)
+        ch_mkref_versions = Channel.empty()
+        ch_mkvdjref_versions = Channel.empty()
+        ch_spaceranger_versions = Channel.empty()
+        ch_atac_mkref_versions = Channel.empty()
 
         //
         // Filter GTF using Cell Ranger mkgtf
@@ -181,83 +181,83 @@ workflow GENOMEPREP {
         //
         // Create Cell Ranger reference
         //
-    if (!workflow.profile?.contains('test')) {
-            CELLRANGER_MKREF(
-                fasta.map { it[1] },
-                CELLRANGER_MKGTF.out.gtf,
-                genome_version_name
-            )
+        if (!workflow.profile?.contains('test')) {
+                CELLRANGER_MKREF(
+                    fasta.map { it[1] },
+                    CELLRANGER_MKGTF.out.gtf,
+                    genome_version_name
+                )
 
-            // Channel to handle CELLRANGER_MKREF output
-            ch_cellranger = CELLRANGER_MKREF.out.reference.ifEmpty {
-                file("no_cellranger", checkIfExists: false)
+                // Channel to handle CELLRANGER_MKREF output
+                ch_cellranger = CELLRANGER_MKREF.out.reference.ifEmpty {
+                    file("no_cellranger", checkIfExists: false)
+                }
+
+                // versions channel for CELLRANGER_MKREF
+                ch_mkref_versions = CELLRANGER_MKREF.out.versions
             }
 
-            // versions channel for CELLRANGER_MKREF
-            ch_mkref_versions = CELLRANGER_MKREF.out.versions
-        }
+        //
+        // Create Cell Ranger VDJ reference
+        //
+        if (!workflow.profile?.contains('test')) {
+                CELLRANGER_MKVDJREF(
+                    fasta.map { it[1] },
+                    CELLRANGER_MKGTF.out.gtf,
+                    vdj_fasta,
+                    genome_version_name
+                )
 
-    //
-    // Create Cell Ranger VDJ reference
-    //
-    if (!workflow.profile?.contains('test')) {
-            CELLRANGER_MKVDJREF(
-                fasta.map { it[1] },
-                CELLRANGER_MKGTF.out.gtf,
-                vdj_fasta,
-                genome_version_name
-            )
+                // Channel to handle CELLRANGER_MKVDJREF output
+                ch_vdj = CELLRANGER_MKVDJREF.out.reference.ifEmpty {
+                    file("no_cellranger_vdj", checkIfExists: false)
+                }
 
-            // Channel to handle CELLRANGER_MKVDJREF output
-            ch_vdj = CELLRANGER_MKVDJREF.out.reference.ifEmpty {
-                file("no_cellranger_vdj", checkIfExists: false)
+                // versions channel for CELLRANGER_MKVDJREF
+                ch_mkvdjref_versions = CELLRANGER_MKVDJREF.out.versions
             }
-
-            // versions channel for CELLRANGER_MKVDJREF
-            ch_mkvdjref_versions = CELLRANGER_MKVDJREF.out.versions
-        }
 
         //
         // Create Spacer Ranger reference
         //
-    if (!workflow.profile?.contains('test')) {
-            SPACERANGER_MKREF(
-                fasta.map { it[1] },
-                CELLRANGER_MKGTF.out.gtf,
-                genome_version_name
-            )
+        if (!workflow.profile?.contains('test')) {
+                SPACERANGER_MKREF(
+                    fasta.map { it[1] },
+                    CELLRANGER_MKGTF.out.gtf,
+                    genome_version_name
+                )
 
-            // Channel to handle SPACERANGER_MKREF output
-            ch_spaceranger = SPACERANGER_MKREF.out.reference.ifEmpty {
-                file("no_spaceranger", checkIfExists: false)
+                // Channel to handle SPACERANGER_MKREF output
+                ch_spaceranger = SPACERANGER_MKREF.out.reference.ifEmpty {
+                    file("no_spaceranger", checkIfExists: false)
+                }
+
+                // versions channel for SPACERANGER_MKREF
+                ch_spaceranger_versions = SPACERANGER_MKREF.out.versions
             }
-
-            // versions channel for SPACERANGER_MKREF
-            ch_spaceranger_versions = SPACERANGER_MKREF.out.versions
-        }
 
         //
         // Create Cell Ranger ATAC reference
         //
-    if (!workflow.profile?.contains('test')) {
-            CELLRANGERATAC_MKREF(
-                fasta.map { it[1] },
-                CELLRANGER_MKGTF.out.gtf,
-                organism,
-                genome_version_name,
-                non_nuclear_contigs,
-                transcription_factors,
-                genome_version_name
-            )
+        if (!workflow.profile?.contains('test')) {
+                CELLRANGERATAC_MKREF(
+                    fasta.map { it[1] },
+                    CELLRANGER_MKGTF.out.gtf,
+                    organism,
+                    genome_version_name,
+                    non_nuclear_contigs,
+                    transcription_factors,
+                    genome_version_name
+                )
 
-            // Channel to handle CELLRANGERATAC_MKREF output
-            ch_atac = CELLRANGERATAC_MKREF.out.reference.ifEmpty {
-                file("no_atac", checkIfExists: false)
+                // Channel to handle CELLRANGERATAC_MKREF output
+                ch_atac = CELLRANGERATAC_MKREF.out.reference.ifEmpty {
+                    file("no_atac", checkIfExists: false)
+                }
+
+                // versions channel for CELLRANGERATAC_MKREF
+                ch_atac_mkref_versions = CELLRANGERATAC_MKREF.out.versions
             }
-
-            // versions channel for CELLRANGERATAC_MKREF
-            ch_atac_mkref_versions = CELLRANGERATAC_MKREF.out.versions
-        }
 
         // Create genomes.config file
         CREATE_GENOMES_CONFIG(
@@ -395,31 +395,31 @@ workflow GENOMEPREP {
                 ch_md5sum_versions
             ).flatten()
 
-    def topic_versions = Channel.topic("versions")
-        .distinct()
-        .branch { entry ->
-            versions_file: entry instanceof Path
-            versions_tuple: true
-        }
+        def topic_versions = Channel.topic("versions")
+            .distinct()
+            .branch { entry ->
+                versions_file: entry instanceof Path
+                versions_tuple: true
+            }
 
-    def topic_versions_string = topic_versions.versions_tuple
-        .map { process, tool, version ->
-            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
-        }
-        .groupTuple(by:0)
-        .map { process, tool_versions ->
-            tool_versions.unique().sort()
-            "${process}:\n${tool_versions.join('\n')}"
-        }
+        def topic_versions_string = topic_versions.versions_tuple
+            .map { process, tool, version ->
+                [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+            }
+            .groupTuple(by:0)
+            .map { process, tool_versions ->
+                tool_versions.unique().sort()
+                "${process}:\n${tool_versions.join('\n')}"
+            }
 
-    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
-        .mix(topic_versions_string)
-        .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
-            name:  'genomeprep_software_'  + 'versions.yml',
-            sort: true,
-            newLine: true
-        ).set { ch_collated_versions }
+        softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+            .mix(topic_versions_string)
+            .collectFile(
+                storeDir: "${params.outdir}/pipeline_info",
+                name:  'genomeprep_software_'  + 'versions.yml',
+                sort: true,
+                newLine: true
+            ).set { ch_collated_versions }
 
     emit:
         versions       = ch_versions
