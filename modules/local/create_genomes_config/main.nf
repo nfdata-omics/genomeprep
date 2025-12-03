@@ -3,12 +3,15 @@ process CREATE_GENOMES_CONFIG {
     tag "$genome_version_name"
 
     conda "${moduleDir}/environment.yml"
-    container 'docker.io/nfdata/genome-config:v1.8.0'
+    container 'docker.io/nfdata/genome-config:v1.10.0'
 
     input:
     val base_dir
     val genome_version_name
     path current_config_file
+    val source
+    val taxid
+    val organism
     path fasta
     path bowtie2_index
     path bwa_index
@@ -95,6 +98,9 @@ process CREATE_GENOMES_CONFIG {
 
     python3.11 $script_path \
         --base_dir $base_dir_path \
+        --source '$source' \
+        --taxid '$taxid' \
+        --organism '$organism' \
         --genome_version_name $genome_version_name \
         $current_config_file_args \
         --fasta $fasta_abs \
