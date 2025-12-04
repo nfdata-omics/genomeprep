@@ -240,7 +240,6 @@
                 "chr21_subset.6.ht2:md5,edca72bf5569c48a20302d1f9c284e57",
                 "chr21_subset.7.ht2:md5,ba7c6a1fd45ecc6fa1956c2046af7c79",
                 "chr21_subset.8.ht2:md5,9cd6ae38743d73a7ac3975689c708f95",
-                "kallisto:md5,73b91e270a025568f2e09771ee529eee",
                 "chr21_subset.mmi:md5,5cf9bdceb8d59d2765fb83d5faed1c33",
                 "README.md:md5,c29393520a46729d5f6f94ba0151c6a3",
                 "genome.transcripts.fa:md5,bb06848dc5604c73fa4b2b1d05436668",
@@ -285,6 +284,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.4"
         },
-        "timestamp": "2025-12-04T15:55:14.325819"
+        "timestamp": "2025-12-04T17:02:39.300972"
     }
 }
