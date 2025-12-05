@@ -3,7 +3,7 @@ process CREATE_GENOMES_CONFIG {
     tag "$genome_version_name"
 
     conda "${moduleDir}/environment.yml"
-    container 'docker.io/nfdata/genome-config:v1.10.0'
+    container 'docker.io/nfdata/genome-config:v1.11.0'
 
     input:
     val base_dir
@@ -13,6 +13,9 @@ process CREATE_GENOMES_CONFIG {
     val taxid
     val organism
     path fasta
+    path kallisto_index
+    path minimap2_index
+    path hisat2_index
     path bowtie2_index
     path bwa_index
     path gatk4_dict
@@ -48,6 +51,9 @@ process CREATE_GENOMES_CONFIG {
     def outdir_abs = java.nio.file.Paths.get(params.outdir.toString()).toAbsolutePath().toString()
 
     def fasta_abs = "$outdir_abs/fasta/$fasta"
+    def kallisto_abs = "$outdir_abs/$kallisto_index"
+    def minimap2_abs = "$outdir_abs/$minimap2_index"
+    def hisat2_abs = "$outdir_abs/$hisat2_index/hisat2"
     def bwa_abs = "$outdir_abs/$bwa_index/bwa/"
     def bowtie2_abs = "$outdir_abs/$bowtie2_index/bowtie2/"
     def gatk_abs = "$outdir_abs/gatk4/$gatk4_dict"
@@ -79,6 +85,7 @@ process CREATE_GENOMES_CONFIG {
     def salmon_args = (salmon_index.name != 'no_salmon') ? "--salmon $salmon_abs" : ""
     def db_args = (db.name != 'no_genes_db') ? "--gene_db $db_abs" : ""
     def bed_args = (bed.name != 'no_bed') ? "--bed12 $bed_abs" : ""
+    def hisat2_args = (hisat2_index.name != 'no_hisat2') ? "--hisat2 $hisat2_abs" : ""
     def current_config_file_args = (current_config_file.name != 'no_current_config_file') ? "--current_config_file $current_config_file_abs" : ""
     """
     #!/bin/bash
@@ -112,6 +119,9 @@ process CREATE_GENOMES_CONFIG {
         --bismark $bismark_abs \
         --chrom_sizes $chrom_sizes_abs \
         --readme $readme_abs \
+        --kallisto $kallisto_abs \
+        --minimap2 $minimap2_abs \
+        $hisat2_args \
         $cellranger_args \
         $atac_args \
         $vdj_args \

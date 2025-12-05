@@ -9,3 +9,4 @@ salmon/salmon/seq.bin
 star/star/Log.out
 genes_db/genes.db
 genomes_config/genomes.config
+kallisto/kallisto

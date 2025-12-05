@@ -19,6 +19,10 @@ include { BISMARK_GENOMEPREPARATION } from '../modules/nf-core/bismark/genomepre
 include { RSEM_PREPAREREFERENCE } from '../modules/nf-core/rsem/preparereference/main'
 include { SALMON_INDEX } from '../modules/nf-core/salmon/index/main.nf'
 include { MD5SUM } from '../modules/nf-core/md5sum/main'
+include { HISAT2_EXTRACTSPLICESITES } from '../modules/nf-core/hisat2/extractsplicesites/main'
+include { HISAT2_BUILD } from '../modules/nf-core/hisat2/build/main'
+include { KALLISTO_INDEX } from '../modules/nf-core/kallisto/index/main'
+include { MINIMAP2_INDEX } from '../modules/nf-core/minimap2/index/main'
 
 include { CREATE_GENES_DB} from '../modules/local/create_genes_db/main.nf'
 include { CREATE_BED_FILES } from '../modules/local/create_bed_files/main.nf'
@@ -67,6 +71,33 @@ workflow GENOMEPREP {
         // Count chromosomes sizes
         //
         COUNT_CHROMOSOMES_SIZES(fasta)
+
+        //
+        // Run Kallisto indexing
+        //
+        KALLISTO_INDEX(fasta)
+
+        //
+        // Run Minimap2 indexing
+        //
+        MINIMAP2_INDEX(fasta)
+
+        //
+        // Extract HISAT2 splice sites from GTF
+        //
+        HISAT2_EXTRACTSPLICESITES(gtf)
+
+        //
+        // Run HISAT2 indexing
+        //
+        HISAT2_BUILD(fasta,
+                      gtf,
+                      HISAT2_EXTRACTSPLICESITES.out.txt)
+
+        // Channel to handle HISAT2 output
+        ch_hisat2 = HISAT2_BUILD.out.index.ifEmpty {
+            file("no_hisat2", checkIfExists: false)
+        }
 
         //
         // Run Bowtie2 indexing
@@ -268,6 +299,9 @@ workflow GENOMEPREP {
             taxid,
             organism,
             fasta.collect { it[1] },
+            KALLISTO_INDEX.out.index.collect { it[1] },
+            MINIMAP2_INDEX.out.index.collect { it[1] },
+            ch_hisat2.collect { it[1] },
             BOWTIE2_BUILD.out.index.collect { it[1] },
             BWA_INDEX.out.index.collect { it[1] },
             GATK4_CREATESEQUENCEDICTIONARY.out.dict.collect { it[1] },
