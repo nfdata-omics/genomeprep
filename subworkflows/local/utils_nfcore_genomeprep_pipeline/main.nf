@@ -132,7 +132,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from taxid provided through params.taxid
     //
-    ch_taxid = Channel.value(taxid)
+    ch_taxid = Channel.value(taxid.toString())
 
     //
     // Create channel from organism name provided through params.organism

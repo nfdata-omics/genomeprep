@@ -3,7 +3,7 @@ process CREATE_GENOMES_CONFIG {
     tag "$genome_version_name"
 
     conda "${moduleDir}/environment.yml"
-    container 'docker.io/nfdata/genome-config:v1.11.0'
+    container 'docker.io/nfdata/genome-config:v1.12.0'
 
     input:
     val base_dir

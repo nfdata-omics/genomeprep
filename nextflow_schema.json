@@ -38,7 +38,7 @@
                     "fa_icon": "fas fa-male"
                 },
                 "taxid": {
-                    "type": "string",
+                    "type": "integer",
                     "fa_icon": "fas fa-bacterium",
                     "description": "NCBI tax id of the organism"
                 },
