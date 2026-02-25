@@ -26,8 +26,6 @@ process SPACERANGER_MKREF {
     // --nthreads is passed to the STAR index generation.
     // see also https://github.com/nf-core/scrnaseq/issues/329
     """
-    mkdir -p "${reference_name}_spaceranger"
-
     spaceranger \\
         mkref \\
         --genome=$reference_name \\

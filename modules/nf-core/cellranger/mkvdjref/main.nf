@@ -28,8 +28,6 @@ process CELLRANGER_MKVDJREF {
     def seqs_in     = (seqs.name != "no_vdj_fasta")         ? "--seqs ${seqs}"      : ""
 
     """
-    mkdir -p "${reference_name}_vdj"
-
     cellranger \\
         mkvdjref \\
         --genome=$reference_name \\

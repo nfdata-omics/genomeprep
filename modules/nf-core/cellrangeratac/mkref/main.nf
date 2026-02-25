@@ -41,8 +41,6 @@ process CELLRANGERATAC_MKREF {
 }
 EOF
 
-    mkdir -p "${reference_name}_atac"
-
     cellranger-atac \\
         mkref \\
         --config=reference_config.json \\

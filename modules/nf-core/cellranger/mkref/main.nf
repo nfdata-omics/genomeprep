@@ -26,8 +26,6 @@ process CELLRANGER_MKREF {
     // --nthreads is passed to the STAR index generation.
     // see also https://github.com/nf-core/scrnaseq/issues/329
     """
-    mkdir -p "${reference_name}_cellranger"
-
     cellranger \\
         mkref \\
         --genome=$reference_name \\
